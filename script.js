@@ -1,0 +1,321 @@
+const itemsTable = document.getElementById('items');
+const totalSpan = document.getElementById('total');
+const amountWordsInput = document.getElementById('amount-words');
+const previewModal = document.getElementById('preview-modal');
+const previewContent = document.getElementById('preview-content');
+let pdfBlob = null;
+let pdfUrl = null;
+let customerSignatures = [];
+
+// Automatically set the current date
+const today = new Date();
+document.getElementById('day').value = today.getDate();
+document.getElementById('month').value = today.getMonth() + 1; // Months are 0-based
+document.getElementById('year').value = today.getFullYear();
+
+// Function to convert number to words with proper "and" placement
+function numberToWords(num) {
+    const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const thousands = ['', 'Thousand', 'Million', 'Billion'];
+
+    if (num === 0) return 'Zero';
+
+    function convertChunk(n) {
+        let words = '';
+        const hundreds = Math.floor(n / 100);
+        n %= 100;
+
+        if (hundreds > 0) {
+            words += units[hundreds] + ' Hundred';
+            if (n > 0) words += ' and '; // Add "and" if there are more digits
+        }
+
+        if (n >= 20) {
+            words += tens[Math.floor(n / 10)];
+            n %= 10;
+            if (n > 0) words += ' ' + units[n];
+        } else if (n >= 10) {
+            words += teens[n - 10];
+        } else if (n > 0) {
+            words += units[n];
+        }
+
+        return words.trim();
+    }
+
+    let words = '';
+    let chunkCount = 0;
+
+    while (num > 0) {
+        const chunk = num % 1000;
+        if (chunk > 0) {
+            let chunkWords = convertChunk(chunk);
+            if (chunkCount > 0) {
+                chunkWords += ' ' + thousands[chunkCount];
+            }
+            // Add "and" before the last chunk if there are higher chunks and the last chunk is less than 100
+            if (words && chunk < 100) {
+                words = chunkWords + ' and ' + words;
+            } else {
+                words = chunkWords + (words ? ' ' + words : '');
+            }
+        }
+        num = Math.floor(num / 1000);
+        chunkCount++;
+    }
+
+    return words.trim();
+}
+
+function calculateTotal() {
+    let total = 0;
+    document.querySelectorAll('.amount').forEach(input => {
+        const amount = parseFloat(input.value) || 0;
+        total += amount;
+    });
+    totalSpan.textContent = total;
+
+    // Convert total to words and update the input
+    const totalStr = total.toString();
+    const [naira, kobo = '00'] = totalStr.split('.');
+    const nairaWords = numberToWords(parseInt(naira));
+    const koboWords = kobo === '00' ? 'Zero' : numberToWords(parseInt(kobo));
+    amountWordsInput.value = `${nairaWords} Naira ${koboWords} Kobo`;
+    document.getElementById('customer-signature-naira').value = nairaWords;
+    document.getElementById('customer-signature-kobo').value = koboWords;
+}
+
+itemsTable.addEventListener('input', (e) => {
+    const row = e.target.closest('tr');
+    const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+    const rate = parseFloat(row.querySelector('.rate').value) || 0;
+    const amountInput = row.querySelector('.amount');
+    amountInput.value = quantity * rate;
+    calculateTotal();
+
+    if (row === itemsTable.lastElementChild && (quantity || rate)) {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" class="sno"></td>
+            <td><input type="text" class="description"></td>
+            <td><input type="text" class="quantity"></td>
+            <td><input type="text" class="rate"></td>
+            <td><input type="text" class="amount" readonly></td>
+        `;
+        itemsTable.appendChild(newRow);
+    }
+});
+
+document.getElementById('signature-upload').addEventListener('change', (e) => {
+    const files = e.target.files;
+    if (files.length === 0) return;
+
+    const container = document.getElementById('customer-signature-container');
+    const nairaInput = document.getElementById('customer-signature-naira');
+    const koboInput = document.getElementById('customer-signature-kobo');
+    const deleteButton = document.getElementById('delete-customer-signature');
+
+    // Limit to 2 signatures
+    const remainingSlots = 3 - customerSignatures.length;
+    const filesToAdd = Array.from(files).slice(0, remainingSlots);
+
+    filesToAdd.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = document.createElement('img');
+            img.src = reader.result;
+            img.alt = 'Customer Signature';
+            img.style.width = '80px';
+            img.style.height = '40px';
+            img.style.marginTop = '5px';
+            img.classList.add('customer-signature');
+            container.appendChild(img);
+            customerSignatures.push(img);
+
+            // Hide Naira and Kobo inputs if signatures are present
+            nairaInput.style.display = 'none';
+            koboInput.style.display = 'none';
+            deleteButton.style.display = 'block';
+
+            // Clear the input to allow re-uploading
+            e.target.value = '';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    if (customerSignatures.length >= 3) {
+        e.target.disabled = true; // Disable further uploads
+    }
+});
+
+function deleteCustomerSignature() {
+    const container = document.getElementById('customer-signature-container');
+    const nairaInput = document.getElementById('customer-signature-naira');
+    const koboInput = document.getElementById('customer-signature-kobo');
+    const deleteButton = document.getElementById('delete-customer-signature');
+    const uploadInput = document.getElementById('signature-upload');
+
+    // Clear all customer signatures
+    container.innerHTML = '';
+    customerSignatures = [];
+    nairaInput.style.display = 'block';
+    koboInput.style.display = 'block';
+    deleteButton.style.display = 'none';
+    uploadInput.disabled = false; // Re-enable the upload input
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForImages(element) {
+    const images = element.querySelectorAll('img');
+    const promises = Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+        });
+    });
+    return Promise.all(promises);
+}
+
+async function generatePDF() {
+    const element = document.getElementById('invoice');
+    const deleteButton = document.getElementById('delete-customer-signature');
+    let buttonParent = null;
+    let buttonDisplayStyle = null;
+
+    // Store the button's parent and display style, then remove it from the DOM
+    if (deleteButton) {
+        buttonParent = deleteButton.parentElement;
+        buttonDisplayStyle = deleteButton.style.display;
+        buttonParent.removeChild(deleteButton);
+    }
+
+    try {
+        // Scroll to the top to ensure the header is in view
+        window.scrollTo(0, 0);
+
+        // Wait for images to load
+        await waitForImages(element);
+
+        // Additional delay to ensure all content is rendered
+        await delay(2000);
+
+        const a4WidthPx = 595; // A4 width in pixels at 72dpi
+        const a4HeightPx = 842; // A4 height in pixels at 72dpi
+        const contentWidth = element.scrollWidth;
+        const contentHeight = element.scrollHeight;
+        const scaleWidth = a4WidthPx / contentWidth;
+        const scaleHeight = a4HeightPx / contentHeight;
+        const scale = Math.min(scaleWidth, scaleHeight) * 2; // Increase scale for sharper rendering
+
+        const opt = {
+            margin: 0,
+            filename: 'invoice.pdf',
+            image: { type: 'png', quality: 1.0 }, // Use PNG for better quality
+            html2canvas: { 
+                scale: scale, // Higher scale for sharper image
+                useCORS: true,
+                width: contentWidth,
+                height: contentHeight,
+                scrollX: 0,
+                scrollY: 0,
+                logging: true,
+                dpi: 300, // Increase DPI for better resolution
+                letterRendering: true // Improve text rendering
+            },
+            jsPDF: { 
+                unit: 'px', 
+                format: [a4WidthPx, a4HeightPx],
+                orientation: 'portrait',
+                putOnlyUsedFonts: true,
+                compress: false // Disable compression for better quality
+            },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        return await html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
+            pdfBlob = pdf.output('blob');
+            pdfUrl = URL.createObjectURL(pdfBlob);
+            return pdfBlob;
+        }).catch(err => {
+            console.error('PDF generation error:', err);
+            alert('Failed to generate PDF. Please try again.');
+        });
+    } finally {
+        // Restore the delete button to the DOM after PDF generation
+        if (deleteButton && buttonParent) {
+            buttonParent.appendChild(deleteButton);
+            deleteButton.style.display = buttonDisplayStyle;
+        }
+    }
+}
+
+async function showPreview() {
+    const invoice = document.getElementById('invoice');
+    previewContent.innerHTML = invoice.outerHTML;
+    previewModal.style.display = 'block';
+}
+
+function closePreview() {
+    previewModal.style.display = 'none';
+    previewContent.innerHTML = '';
+    if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+        pdfUrl = null;
+        pdfBlob = null;
+    }
+}
+
+async function downloadPDF() {
+    await generatePDF();
+    if (pdfBlob) {
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'invoice.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+}
+
+async function sendEmail() {
+    if (!pdfBlob) await generatePDF();
+    if (pdfBlob && pdfUrl) {
+        const recipient = document.getElementById('customer-email').value || 'customer@example.com';
+        const subject = encodeURIComponent('Your Invoice from D\'More Tech');
+        const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice linked below:\n${pdfUrl}\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
+        const emailLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
+        const tempLink = document.createElement('a');
+        tempLink.href = emailLink;
+        tempLink.click();
+    } else {
+        alert('Failed to generate PDF for email. Please try again.');
+    }
+}
+
+document.getElementById('email-link').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await sendEmail();
+});
+
+document.getElementById('email-link-modal').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await sendEmail();
+});
+
+document.getElementById('whatsapp-link').addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (!pdfBlob) await generatePDF();
+    if (pdfBlob) {
+        const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
+        const url = URL.createObjectURL(pdfBlob);
+        const message = encodeURIComponent('Here is your invoice from D\'More Tech. Download it here: ' + url + '\n\nSent from: dmoretech44@gmail.com');
+        const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
+        window.open(whatsappLink, '_blank');
+    }
+});

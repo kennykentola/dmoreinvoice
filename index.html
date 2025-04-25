@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D'More Tech Invoice Generator</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="contact-form">
+        <h3>Customer Contact Information</h3>
+        <label for="customer-email">Customer Gmail:</label>
+        <input type="email" id="customer-email" placeholder="Enter customer's Gmail">
+        <label for="customer-whatsapp">Customer WhatsApp (Phone Number):</label>
+        <input type="text" id="customer-whatsapp" placeholder="Enter customer's WhatsApp number (e.g., +1234567890)">
+    </div>
+
+    <div class="container" id="invoice">
+        <div class="header">
+            <div class="header-top">
+                <img class="logo" src="/images/logo.png" alt="Logo">
+                <div class="header-text">
+                    <h1>D'MORE TECH ENGINEERING & TRADING COMPANY</h1>
+                    <p class="motto"><strong>Motto:</strong> prendre le risque</p>
+                </div>
+            </div>
+            <div class="header-images">
+                <div class="left-images">
+                    <img class="header-img left-img" src="/images/tv.avif" alt="TV">
+                    <img class="header-img left-img" src="/images/freezer.png" alt="freezer">
+                </div>
+                <div class="header-details">
+                    <p>Deal with sales of electronics such as TVs, home theater, freezer, oven, microwave, generator, air conditioner, blender, solar products, etc. sales, repair and maintenance</p>
+                    <p><strong>Office Address:</strong> Iyanu Barack, Ojoo Ibadan</p>
+                    <p><strong>Email:</strong> olaniyi14@gmail.com, dmoretech44@gmail.com</p>
+                    <p><strong>Tel:</strong> 08142259939, 09030804218, 07057339815</p>
+                    <p><strong>RC:</strong> 3413570</p>
+                </div>
+                <div class="right-images">
+                    <img class="header-img right-img" src="/images/gen.jpg" alt="Generator">
+                    <img class="header-img right-img" src="/images/fan.jpg" alt="Fan">
+                </div>
+            </div>
+        </div>
+
+        <div class="invoice-title">CASH SALES INVOICE</div>
+
+        <div class="recipient">
+            <div>
+                <label>TO: </label>
+                <input type="text" id="recipient" placeholder="Recipient Name">
+            </div>
+            <div class="date">
+                <label>DAY </label>
+                <input type="text" id="day" readonly>
+                <label>MONTH </label>
+                <input type="text" id="month" readonly>
+                <label>YEAR </label>
+                <input type="text" id="year" readonly>
+            </div>
+        </div>
+
+        <img class="background-img" src="/images/gen.jpg" alt="Background">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>S/N</th>
+                    <th>Description of Goods</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Amount<br>N K</th>
+                </tr>
+            </thead>
+            <tbody id="items">
+                <tr>
+                    <td><input type="text" class="sno"></td>
+                    <td><input type="text" class="description"></td>
+                    <td><input type="text" class="quantity"></td>
+                    <td><input type="text" class="rate"></td>
+                    <td><input type="text" class="amount" readonly></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total">TOTAL N <span id="total">0</span></div>
+
+        <div class="note">
+            <strong>Please Note:</strong> Goods sold in good condition are not returnable.<br>
+            Thank you for your patronage.<br>
+            <h3 style="font-size: 10px;">Amount in words:</h3> <input type="text" id="amount-words" readonly>
+        </div>
+
+        <div class="signature">
+            <div class="customer-signature-section">
+                <label>Customer's Signature: </label><br>
+                <input type="text" id="customer-signature-naira" placeholder="Naira" readonly>
+                <input type="text" id="customer-signature-kobo" placeholder="Kobo" readonly>
+                <div id="customer-signature-container"></div>
+                <button id="delete-customer-signature" style="display: none;" onclick="deleteCustomerSignature()">Delete Signature</button>
+            </div>
+            <div>
+                <label>Manager's Signature: </label><br>
+                <img id="manager-signature" src="/images/manager_signature.png" alt="Manager Signature">
+            </div>
+        </div>
+    </div>
+
+    <div class="upload-section">
+        <label>CustomerSignature: </label>
+        <input type="file" id="signature-upload" placeholder="upload customer signature" accept="image/*">
+    </div>
+
+    <div class="buttons">
+        <button class="preview-btn" onclick="showPreview()">Preview Invoice</button>
+        <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+        <a class="email-btn" id="email-link" href="#">Send via Email</a>
+        <a class="whatsapp-btn" id="whatsapp-link" href="#">Send via WhatsApp</a>
+    </div>
+
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePreview()">×</span>
+            <h2>Invoice Preview</h2>
+            <div id="preview-content"></div>
+            <div class="modal-buttons">
+                <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+                <a class="email-btn" id="email-link-modal" href="#">Send via Email</a>
+                <button onclick="closePreview()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>

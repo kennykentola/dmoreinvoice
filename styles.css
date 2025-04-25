@@ -1,0 +1,535 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 5px;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 100%;
+    max-width: 595px; /* A4 width in pixels at 72dpi */
+    max-height: 842px; /* A4 height in pixels at 72dpi */
+    margin: 0 auto;
+    background: #fff;
+    padding: 15px; /* Increased padding for margins on all edges */
+    border: 1px solid #ddd;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.header {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 5px;
+}
+
+.header img.logo {
+    width: 50px;
+    margin-right: 10px;
+    align-items: center;
+    margin-bottom: 26px;
+}
+
+.header-text {
+    flex: 1;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;
+}
+
+.header .motto {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 2px 0;
+    text-align: center;
+}
+
+.header-images {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.left-images {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.header-img.left-img {
+    width: 80px;
+    height: auto;
+}
+
+.header-details {
+    flex: 1;
+    text-align: center;
+}
+
+.header-details p {
+    font-size: 10px;
+    margin: 2px 0;
+    font-size: 12px;
+    font-weight: theme(#90ee90, 900);
+    font-style: theme(#90ee90, oblique);
+    gap: 5px;
+}
+
+.right-images {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.header-img.right-img {
+    width: 60px;
+    height: auto;
+}
+
+.invoice-title {
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background: #000;
+    color: #fff;
+    padding: 5px;
+    text-align: center;
+    font-weight: 700;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.recipient {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.recipient div {
+    display: flex;
+    align-items: center;
+}
+
+.recipient label {
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+.recipient input {
+    width: 100px;
+    padding: 2px;
+    font-size: 12px;
+}
+
+.date {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.date label {
+    font-size: 12px;
+}
+
+.date input {
+    width: 40px;
+    padding: 2px;
+    background: #f0f0f0;
+    font-size: 12px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 4px;
+    text-align: center;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-size: 12px;
+}
+
+tbody {
+    background-color: #90ee90; /* Light green background for table body */
+}
+
+td input {
+    width: 100%;
+    border: none;
+    text-align: center;
+    font-size: 12px;
+}
+
+.total {
+    text-align: right;
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.note {
+    font-size: 8px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.note input {
+    width: 100%;
+    padding: 2px;
+    font-size: 8px;
+    border: none; /* Remove border for Amount in words */
+    background: transparent; /* Ensure background matches the container */
+}
+
+.signature {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.signature div {
+    text-align: center;
+}
+
+.signature label {
+    font-size: 10px;
+}
+
+.signature img {
+    width: 80px;
+    height: 40px;
+    margin-top: 5px;
+}
+
+.signature input {
+    width: 80px;
+    padding: 2px;
+    font-size: 8px;
+    text-align: center;
+    margin-top: 5px;
+}
+
+#delete-customer-signature {
+    background: #ff0000;
+    color: #fff;
+    border: none;
+    padding: 3px 6px;
+    font-size: 8px;
+    cursor: pointer;
+    margin-top: 5px;
+    border-radius: 3px;
+}
+
+#delete-customer-signature:hover {
+    background: #cc0000;
+}
+
+.customer-signature-section {
+    position: relative;
+}
+
+#customer-signature-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+}
+
+.buttons {
+    text-align: center;
+}
+
+.buttons button, .buttons a {
+    padding: 5px 10px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.preview-btn {
+    background: #4CAF50;
+}
+
+.download-btn {
+    background: #ff0000;
+}
+
+.email-btn {
+    background: #ffa500;
+}
+
+.whatsapp-btn {
+    background: #25D366;
+}
+
+.upload-section {
+    margin-bottom: 8px;
+    text-align: center; /* Center the upload section */
+}
+
+.upload-section label {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.upload-section input {
+    display: inline-block;
+    width: auto; /* Prevent stretching */
+    padding: 2px;
+    font-size: 10px;
+}
+
+.background-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    z-index: -1;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+}
+
+.contact-form {
+    margin-bottom: 8px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    text-align: center; /* Center the form content */
+}
+
+.contact-form h3 {
+    margin-bottom: 10px;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.contact-form input {
+    width: 250px; /* Fixed width to prevent stretching */
+    padding: 2px;
+    margin: 0 auto 5px auto; /* Center the input */
+    display: block;
+    font-size: 10px;
+}
+
+/* Modal for Preview */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 12px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 900px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal-buttons {
+    text-align: center;
+    margin-top: 12px;
+}
+
+.modal-buttons button, .modal-buttons a {
+    padding: 5px 10px;
+    margin: 0 6px;
+    border-radius: 5px;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 14px;
+    }
+
+    .header .motto {
+        font-size: 10px;
+    }
+
+    .header-details p {
+        font-size: 8px;
+    }
+
+    .header img.logo {
+        width: 40px;
+    }
+
+    .header-img.left-img {
+        width: 60px;
+    }
+
+    .header-img.right-img {
+        width: 50px;
+    }
+
+    .recipient {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .recipient div {
+        width: 100%;
+    }
+
+    .recipient input {
+        width: 100%;
+    }
+
+    .date {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .date input {
+        width: 30%;
+        font-size: 10px;
+    }
+
+    table {
+        font-size: 8px;
+    }
+
+    th, td {
+        padding: 3px;
+    }
+
+    th:nth-child(1), td:nth-child(1) { /* S/N */
+        width: 10%;
+    }
+
+    th:nth-child(2), td:nth-child(2) { /* Description of Goods */
+        width: 40%;
+    }
+
+    th:nth-child(3), td:nth-child(3) { /* Qty */
+        width: 15%;
+    }
+
+    th:nth-child(4), td:nth-child(4) { /* Rate */
+        width: 15%;
+    }
+
+    th:nth-child(5), td:nth-child(5) { /* Amount */
+        width: 20%;
+    }
+
+    td input {
+        font-size: 8px;
+    }
+
+    .total {
+        font-size: 10px;
+    }
+
+    .note {
+        font-size: 7px;
+    }
+
+    .signature {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .signature img {
+        width: 60px;
+        height: 30px;
+    }
+
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .buttons button, .buttons a {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 10px;
+        padding: 5px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 8px;
+    }
+
+    .contact-form input {
+        width: 200px; /* Slightly smaller on mobile */
+    }
+}
+
+/* Ensure PDF rendering */
+@media print {
+    .container {
+        width: 595px;
+        height: 842px;
+        margin: 0;
+        padding: 15px;
+    }
+
+    .header, .invoice-title, .recipient, table, .total, .note, .signature {
+        page-break-inside: avoid;
+    }
+
+    #delete-customer-signature {
+        display: none !important; /* Hide the delete button in PDF */
+    }
+}
