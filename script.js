@@ -334,19 +334,28 @@ async function downloadPDF() {
 
 async function sendEmail() {
     try {
+        // Generate and download the PDF first
         if (!pdfBlob) await generatePDF();
-        if (pdfBlob && pdfBase64) {
+        if (pdfBlob) {
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+            console.log('PDF downloaded for email');
+
+            // Open a mailto link with instructions to attach the downloaded PDF
             const recipient = document.getElementById('customer-email').value || 'customer@example.com';
             const subject = encodeURIComponent('Your Invoice from D\'More Tech');
-            const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
-            const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice attached below. Download it by clicking the link:\n${dataUrl}\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
+            const body = encodeURIComponent(`Dear Customer,\n\nI have downloaded the invoice PDF for you (named "invoice.pdf"). Please attach it to this email before sending.\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
             const emailLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
             const tempLink = document.createElement('a');
             tempLink.href = emailLink;
             tempLink.click();
-            console.log('Email sent with data URL:', emailLink);
+            console.log('Email opened with instructions:', emailLink);
         } else {
-            throw new Error('PDF blob or base64 not available');
+            throw new Error('PDF blob not available');
         }
     } catch (err) {
         console.error('Error sending email:', err);
