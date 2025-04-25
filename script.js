@@ -175,8 +175,14 @@ async function waitForImages(element) {
     const promises = Array.from(images).map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
+            img.onload = () => {
+                console.log(`Image loaded: ${img.src}`);
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`Failed to load image: ${img.src}`);
+                resolve(); // Resolve even on error to avoid blocking
+            };
         });
     });
     return Promise.all(promises);
@@ -186,8 +192,15 @@ async function waitForImages(element) {
 function blobToBase64(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]); // Extract base64 part
-        reader.onerror = reject;
+        reader.onloadend = () => {
+            const base64String = reader.result.split(',')[1]; // Extract base64 part
+            console.log('Blob converted to base64 successfully');
+            resolve(base64String);
+        };
+        reader.onerror = (err) => {
+            console.error('Error converting blob to base64:', err);
+            reject(err);
+        };
         reader.readAsDataURL(blob);
     });
 }
@@ -210,9 +223,11 @@ async function generatePDF() {
         window.scrollTo(0, 0);
 
         // Wait for images to load
+        console.log('Waiting for images to load...');
         await waitForImages(element);
 
         // Additional delay to ensure all content is rendered
+        console.log('Adding delay for rendering...');
         await delay(2000);
 
         // Dynamically calculate dimensions based on viewport
@@ -230,10 +245,12 @@ async function generatePDF() {
             const scaleWidth = viewportWidth / contentWidth;
             const scaleHeight = viewportHeight / contentHeight;
             scale = Math.min(scaleWidth, scaleHeight) * 1.5; // Reduced scale for mobile
+            console.log('Mobile scale calculated:', scale);
         } else {
             const scaleWidth = a4WidthPx / contentWidth;
             const scaleHeight = a4HeightPx / contentHeight;
             scale = Math.min(scaleWidth, scaleHeight) * 2; // Desktop scale
+            console.log('Desktop scale calculated:', scale);
         }
 
         const opt = {
@@ -261,15 +278,23 @@ async function generatePDF() {
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
+        console.log('Generating PDF with options:', opt);
         const pdf = await html2pdf().from(element).set(opt).toPdf().get('pdf');
         pdfBlob = pdf.output('blob');
+        console.log('PDF blob generated:', pdfBlob);
         pdfBase64 = await blobToBase64(pdfBlob); // Convert to base64
+        console.log('PDF base64 generated');
         return pdfBlob;
+    } catch (err) {
+        console.error('Error in generatePDF:', err);
+        alert('Failed to generate PDF. Please check the console for details and try again.');
+        throw err;
     } finally {
         // Restore the delete button to the DOM after PDF generation
         if (deleteButton && buttonParent) {
             buttonParent.appendChild(deleteButton);
             deleteButton.style.display = buttonDisplayStyle;
+            console.log('Delete button restored');
         }
     }
 }
@@ -278,6 +303,7 @@ async function showPreview() {
     const invoice = document.getElementById('invoice');
     previewContent.innerHTML = invoice.outerHTML;
     previewModal.style.display = 'block';
+    console.log('Preview modal displayed');
 }
 
 function closePreview() {
@@ -285,33 +311,46 @@ function closePreview() {
     previewContent.innerHTML = '';
     pdfBlob = null;
     pdfBase64 = null;
+    console.log('Preview modal closed');
 }
 
 async function downloadPDF() {
-    await generatePDF();
-    if (pdfBlob) {
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'invoice.pdf';
-        a.click();
-        URL.revokeObjectURL(url);
+    try {
+        await generatePDF();
+        if (pdfBlob) {
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+            console.log('PDF downloaded');
+        }
+    } catch (err) {
+        console.error('Error downloading PDF:', err);
+        alert('Failed to download PDF. Please try again.');
     }
 }
 
 async function sendEmail() {
-    if (!pdfBlob) await generatePDF();
-    if (pdfBlob && pdfBase64) {
-        const recipient = document.getElementById('customer-email').value || 'customer@example.com';
-        const subject = encodeURIComponent('Your Invoice from D\'More Tech');
-        const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
-        const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice attached below. Download it by clicking the link:\n${dataUrl}\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
-        const emailLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
-        const tempLink = document.createElement('a');
-        tempLink.href = emailLink;
-        tempLink.click();
-    } else {
-        alert('Failed to generate PDF for email. Please try again.');
+    try {
+        if (!pdfBlob) await generatePDF();
+        if (pdfBlob && pdfBase64) {
+            const recipient = document.getElementById('customer-email').value || 'customer@example.com';
+            const subject = encodeURIComponent('Your Invoice from D\'More Tech');
+            const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
+            const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice attached below. Download it by clicking the link:\n${dataUrl}\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
+            const emailLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
+            const tempLink = document.createElement('a');
+            tempLink.href = emailLink;
+            tempLink.click();
+            console.log('Email sent with data URL:', emailLink);
+        } else {
+            throw new Error('PDF blob or base64 not available');
+        }
+    } catch (err) {
+        console.error('Error sending email:', err);
+        alert('Failed to send email. Please try again.');
     }
 }
 
@@ -327,14 +366,20 @@ document.getElementById('email-link-modal').addEventListener('click', async (e) 
 
 document.getElementById('whatsapp-link').addEventListener('click', async (e) => {
     e.preventDefault();
-    if (!pdfBlob) await generatePDF();
-    if (pdfBlob && pdfBase64) {
-        const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
-        const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
-        const message = encodeURIComponent('Here is your invoice from D\'More Tech. Download it here: ' + dataUrl + '\n\nSent from: dmoretech44@gmail.com');
-        const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
-        window.open(whatsappLink, '_blank');
-    } else {
-        alert('Failed to generate PDF for WhatsApp. Please try again.');
+    try {
+        if (!pdfBlob) await generatePDF();
+        if (pdfBlob && pdfBase64) {
+            const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
+            const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
+            const message = encodeURIComponent('Here is your invoice from D\'More Tech. Download it here: ' + dataUrl + '\n\nSent from: dmoretech44@gmail.com');
+            const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
+            window.open(whatsappLink, '_blank');
+            console.log('WhatsApp link opened:', whatsappLink);
+        } else {
+            throw new Error('PDF blob or base64 not available');
+        }
+    } catch (err) {
+        console.error('Error sending WhatsApp message:', err);
+        alert('Failed to send WhatsApp message. Please try again.');
     }
 });
