@@ -7,11 +7,11 @@ body {
 
 .container {
     width: 100%;
-    max-width: 595px; /* A4 width in pixels at 72dpi */
-    max-height: 842px; /* A4 height in pixels at 72dpi */
+    max-width: 595px; /* A4 width in pixels at 72dpi for desktop */
+    max-height: 842px; /* A4 height in pixels at 72dpi for desktop */
     margin: 0 auto;
     background: #fff;
-    padding: 15px; /* Increased padding for margins on all edges */
+    padding: 15px;
     border: 1px solid #ddd;
     position: relative;
     box-sizing: border-box;
@@ -33,8 +33,6 @@ body {
 .header img.logo {
     width: 50px;
     margin-right: 10px;
-    align-items: center;
-    margin-bottom: 26px;
 }
 
 .header-text {
@@ -81,10 +79,6 @@ body {
 .header-details p {
     font-size: 10px;
     margin: 2px 0;
-    font-size: 12px;
-    font-weight: theme(#90ee90, 900);
-    font-style: theme(#90ee90, oblique);
-    gap: 5px;
 }
 
 .right-images {
@@ -99,7 +93,7 @@ body {
 }
 
 .invoice-title {
-    display: inline-block;
+    display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 5px;
@@ -392,31 +386,45 @@ td input {
 /* Mobile Responsiveness */
 @media (max-width: 600px) {
     .container {
+        width: 90vw; /* Use viewport width for mobile */
+        max-width: none; /* Remove fixed max-width on mobile */
+        max-height: none; /* Remove fixed height on mobile */
         padding: 10px;
     }
 
     .header h1 {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .header .motto {
-        font-size: 10px;
-    }
-
-    .header-details p {
         font-size: 8px;
     }
 
+    .header-details p {
+        font-size: 6px;
+    }
+
     .header img.logo {
-        width: 40px;
+        width: 30px;
     }
 
     .header-img.left-img {
-        width: 60px;
+        width: 50px;
     }
 
     .header-img.right-img {
-        width: 50px;
+        width: 40px;
+    }
+
+    .header-images {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .left-images, .right-images {
+        flex-direction: row;
+        justify-content: center;
+        gap: 5px;
     }
 
     .recipient {
@@ -428,8 +436,13 @@ td input {
         width: 100%;
     }
 
+    .recipient label {
+        font-size: 10px;
+    }
+
     .recipient input {
         width: 100%;
+        font-size: 10px;
     }
 
     .date {
@@ -438,9 +451,18 @@ td input {
         width: 100%;
     }
 
-    .date input {
-        width: 30%;
+    .date label {
         font-size: 10px;
+    }
+
+    .date input {
+        width: 25%;
+        font-size: 8px;
+    }
+
+    .invoice-title {
+        font-size: 10px;
+        padding: 3px;
     }
 
     table {
@@ -448,7 +470,7 @@ td input {
     }
 
     th, td {
-        padding: 3px;
+        padding: 2px;
     }
 
     th:nth-child(1), td:nth-child(1) { /* S/N */
@@ -480,17 +502,35 @@ td input {
     }
 
     .note {
-        font-size: 7px;
+        font-size: 6px;
+    }
+
+    .note input {
+        font-size: 6px;
     }
 
     .signature {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+    }
+
+    .signature label {
+        font-size: 8px;
     }
 
     .signature img {
         width: 60px;
         height: 30px;
+    }
+
+    .signature input {
+        width: 60px;
+        font-size: 6px;
+    }
+
+    #delete-customer-signature {
+        font-size: 6px;
+        padding: 2px 4px;
     }
 
     .buttons {
@@ -519,10 +559,11 @@ td input {
 /* Ensure PDF rendering */
 @media print {
     .container {
-        width: 595px;
-        height: 842px;
+        width: 595px; /* A4 width in pixels */
+        height: 842px; /* A4 height in pixels */
         margin: 0;
         padding: 15px;
+        box-sizing: border-box;
     }
 
     .header, .invoice-title, .recipient, table, .total, .note, .signature {
@@ -531,5 +572,71 @@ td input {
 
     #delete-customer-signature {
         display: none !important; /* Hide the delete button in PDF */
+    }
+
+    /* Adjust for mobile PDF rendering */
+    @media (max-width: 600px) {
+        .container {
+            width: 100%;
+            height: auto;
+            padding: 10px;
+        }
+
+        .header h1 {
+            font-size: 12px;
+        }
+
+        .header .motto {
+            font-size: 8px;
+        }
+
+        .header-details p {
+            font-size: 6px;
+        }
+
+        .header img.logo {
+            width: 30px;
+        }
+
+        .header-img.left-img {
+            width: 50px;
+        }
+
+        .header-img.right-img {
+            width: 40px;
+        }
+
+        .recipient label, .date label {
+            font-size: 10px;
+        }
+
+        .recipient input, .date input {
+            font-size: 8px;
+        }
+
+        .invoice-title {
+            font-size: 10px;
+        }
+
+        table, th, td, td input {
+            font-size: 8px;
+        }
+
+        .total {
+            font-size: 10px;
+        }
+
+        .note, .note input {
+            font-size: 6px;
+        }
+
+        .signature label {
+            font-size: 8px;
+        }
+
+        .signature img {
+            width: 60px;
+            height: 30px;
+        }
     }
 }

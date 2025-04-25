@@ -4,8 +4,7 @@ const amountWordsInput = document.getElementById('amount-words');
 const previewModal = document.getElementById('preview-modal');
 const previewContent = document.getElementById('preview-content');
 let pdfBlob = null;
-let pdfUrl = null;
-let customerSignatures = [];
+let pdfBase64 = null;
 
 // Automatically set the current date
 const today = new Date();
@@ -108,6 +107,7 @@ itemsTable.addEventListener('input', (e) => {
     }
 });
 
+let customerSignatures = [];
 document.getElementById('signature-upload').addEventListener('change', (e) => {
     const files = e.target.files;
     if (files.length === 0) return;
@@ -118,7 +118,7 @@ document.getElementById('signature-upload').addEventListener('change', (e) => {
     const deleteButton = document.getElementById('delete-customer-signature');
 
     // Limit to 2 signatures
-    const remainingSlots = 3 - customerSignatures.length;
+    const remainingSlots = 2 - customerSignatures.length;
     const filesToAdd = Array.from(files).slice(0, remainingSlots);
 
     filesToAdd.forEach(file => {
@@ -145,7 +145,7 @@ document.getElementById('signature-upload').addEventListener('change', (e) => {
         reader.readAsDataURL(file);
     });
 
-    if (customerSignatures.length >= 3) {
+    if (customerSignatures.length >= 2) {
         e.target.disabled = true; // Disable further uploads
     }
 });
@@ -182,6 +182,16 @@ async function waitForImages(element) {
     return Promise.all(promises);
 }
 
+// Convert blob to base64
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]); // Extract base64 part
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
 async function generatePDF() {
     const element = document.getElementById('invoice');
     const deleteButton = document.getElementById('delete-customer-signature');
@@ -205,20 +215,33 @@ async function generatePDF() {
         // Additional delay to ensure all content is rendered
         await delay(2000);
 
+        // Dynamically calculate dimensions based on viewport
+        const isMobile = window.innerWidth <= 600;
         const a4WidthPx = 595; // A4 width in pixels at 72dpi
         const a4HeightPx = 842; // A4 height in pixels at 72dpi
         const contentWidth = element.scrollWidth;
         const contentHeight = element.scrollHeight;
-        const scaleWidth = a4WidthPx / contentWidth;
-        const scaleHeight = a4HeightPx / contentHeight;
-        const scale = Math.min(scaleWidth, scaleHeight) * 2; // Increase scale for sharper rendering
+
+        // Adjust scale for mobile devices
+        let scale;
+        if (isMobile) {
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const scaleWidth = viewportWidth / contentWidth;
+            const scaleHeight = viewportHeight / contentHeight;
+            scale = Math.min(scaleWidth, scaleHeight) * 1.5; // Reduced scale for mobile
+        } else {
+            const scaleWidth = a4WidthPx / contentWidth;
+            const scaleHeight = a4HeightPx / contentHeight;
+            scale = Math.min(scaleWidth, scaleHeight) * 2; // Desktop scale
+        }
 
         const opt = {
             margin: 0,
             filename: 'invoice.pdf',
             image: { type: 'png', quality: 1.0 }, // Use PNG for better quality
             html2canvas: { 
-                scale: scale, // Higher scale for sharper image
+                scale: scale,
                 useCORS: true,
                 width: contentWidth,
                 height: contentHeight,
@@ -230,7 +253,7 @@ async function generatePDF() {
             },
             jsPDF: { 
                 unit: 'px', 
-                format: [a4WidthPx, a4HeightPx],
+                format: isMobile ? [contentWidth * scale, contentHeight * scale] : [a4WidthPx, a4HeightPx],
                 orientation: 'portrait',
                 putOnlyUsedFonts: true,
                 compress: false // Disable compression for better quality
@@ -238,14 +261,10 @@ async function generatePDF() {
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        return await html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
-            pdfBlob = pdf.output('blob');
-            pdfUrl = URL.createObjectURL(pdfBlob);
-            return pdfBlob;
-        }).catch(err => {
-            console.error('PDF generation error:', err);
-            alert('Failed to generate PDF. Please try again.');
-        });
+        const pdf = await html2pdf().from(element).set(opt).toPdf().get('pdf');
+        pdfBlob = pdf.output('blob');
+        pdfBase64 = await blobToBase64(pdfBlob); // Convert to base64
+        return pdfBlob;
     } finally {
         // Restore the delete button to the DOM after PDF generation
         if (deleteButton && buttonParent) {
@@ -264,11 +283,8 @@ async function showPreview() {
 function closePreview() {
     previewModal.style.display = 'none';
     previewContent.innerHTML = '';
-    if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
-        pdfUrl = null;
-        pdfBlob = null;
-    }
+    pdfBlob = null;
+    pdfBase64 = null;
 }
 
 async function downloadPDF() {
@@ -285,10 +301,11 @@ async function downloadPDF() {
 
 async function sendEmail() {
     if (!pdfBlob) await generatePDF();
-    if (pdfBlob && pdfUrl) {
+    if (pdfBlob && pdfBase64) {
         const recipient = document.getElementById('customer-email').value || 'customer@example.com';
         const subject = encodeURIComponent('Your Invoice from D\'More Tech');
-        const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice linked below:\n${pdfUrl}\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
+        const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
+        const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice attached below. Download it by clicking the link:\n${dataUrl}\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
         const emailLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
         const tempLink = document.createElement('a');
         tempLink.href = emailLink;
@@ -311,11 +328,13 @@ document.getElementById('email-link-modal').addEventListener('click', async (e) 
 document.getElementById('whatsapp-link').addEventListener('click', async (e) => {
     e.preventDefault();
     if (!pdfBlob) await generatePDF();
-    if (pdfBlob) {
+    if (pdfBlob && pdfBase64) {
         const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
-        const url = URL.createObjectURL(pdfBlob);
-        const message = encodeURIComponent('Here is your invoice from D\'More Tech. Download it here: ' + url + '\n\nSent from: dmoretech44@gmail.com');
+        const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
+        const message = encodeURIComponent('Here is your invoice from D\'More Tech. Download it here: ' + dataUrl + '\n\nSent from: dmoretech44@gmail.com');
         const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
         window.open(whatsappLink, '_blank');
+    } else {
+        alert('Failed to generate PDF for WhatsApp. Please try again.');
     }
 });
