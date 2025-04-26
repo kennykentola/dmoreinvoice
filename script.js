@@ -376,15 +376,15 @@ async function sendEmail() {
             URL.revokeObjectURL(url);
             console.log('PDF downloaded for email');
 
-            // Open a mailto link with instructions to attach the downloaded PDF
+            // Open a mailto link with instructions for the manager to attach the PDF
             const recipient = document.getElementById('customer-email').value || 'customer@example.com';
             const subject = encodeURIComponent('Your Invoice from D\'More Tech');
-            const body = encodeURIComponent(`Dear Customer,\n\nI have downloaded the invoice PDF for you (named "invoice.pdf"). Please attach it to this email before sending.\n\nThis invoice is sent from D'More Tech (dmoretech44@gmail.com).\n\nBest regards,\nD'More Tech Team`);
+            const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice attached.\n\nBest regards,\nD'More Tech Team\n(dmoretech44@gmail.com)`);
             const emailLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
             const tempLink = document.createElement('a');
             tempLink.href = emailLink;
             tempLink.click();
-            console.log('Email opened with instructions:', emailLink);
+            console.log('Email opened with updated instructions:', emailLink);
         } else {
             throw new Error('PDF blob not available');
         }
@@ -407,23 +407,24 @@ document.getElementById('email-link-modal').addEventListener('click', async (e) 
 document.getElementById('whatsapp-link').addEventListener('click', async (e) => {
     e.preventDefault();
     try {
-        // Generate and download the PDF first
+        // Generate the PDF if not already generated
         if (!pdfBlob) await generatePDF();
         if (pdfBlob) {
-            const url = URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'invoice.pdf';
-            a.click();
-            URL.revokeObjectURL(url);
-            console.log('PDF downloaded for WhatsApp');
+            // Create a temporary URL for the PDF blob
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            console.log('Temporary PDF URL generated:', pdfUrl);
 
-            // Open a WhatsApp link with instructions to attach the downloaded PDF
+            // Prepare the WhatsApp message with the PDF link
             const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
-            const message = encodeURIComponent('Here is your invoice from D\'More Tech. I have downloaded the invoice PDF for you (named "invoice.pdf"). Please attach it to this chat and send.\n\nSent from: dmoretech44@gmail.com');
+            const message = encodeURIComponent(`Here is your invoice from D'More Tech. Download the PDF here: ${pdfUrl}\n\nNote: This link is temporary and will expire when the browser tab is closed.\n\nSent from: dmoretech44@gmail.com`);
             const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+            // Open the WhatsApp link
             window.open(whatsappLink, '_blank');
-            console.log('WhatsApp link opened with instructions:', whatsappLink);
+            console.log('WhatsApp link opened with PDF URL:', whatsappLink);
+
+            // Note: The URL will be revoked when the page is refreshed or closed
+            // We don't revoke it immediately to allow the user to click the link
         } else {
             throw new Error('PDF blob not available');
         }
