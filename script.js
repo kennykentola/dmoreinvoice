@@ -7,10 +7,12 @@ let pdfBlob = null;
 let pdfBase64 = null;
 
 // Automatically set the current date
-const today = new Date();
-document.getElementById('day').value = today.getDate();
-document.getElementById('month').value = today.getMonth() + 1; // Months are 0-based
-document.getElementById('year').value = today.getFullYear();
+window.onload = function() {
+    const today = new Date();
+    document.getElementById('day').value = today.getDate();
+    document.getElementById('month').value = today.getMonth() + 1; // Months are 0-based
+    document.getElementById('year').value = today.getFullYear();
+};
 
 // Function to convert number to words with proper "and" placement
 function numberToWords(num) {
@@ -88,13 +90,16 @@ function calculateTotal() {
 
 itemsTable.addEventListener('input', (e) => {
     const row = e.target.closest('tr');
-    const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-    const rate = parseFloat(row.querySelector('.rate').value) || 0;
+    const quantityInput = row.querySelector('.quantity');
+    const rateInput = row.querySelector('.rate');
+    const quantity = parseFloat(quantityInput.value) || 0;
+    const rate = parseFloat(rateInput.value) || 0;
     const amountInput = row.querySelector('.amount');
     amountInput.value = quantity * rate;
     calculateTotal();
 
-    if (row === itemsTable.lastElementChild && (quantity || rate)) {
+    // Add a new row if the current row is the last one and either quantity or rate is filled
+    if (row === itemsTable.lastElementChild && (quantityInput.value || rateInput.value)) {
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td><input type="text" class="sno"></td>
@@ -230,40 +235,32 @@ async function generatePDF() {
         console.log('Adding delay for rendering...');
         await delay(2000);
 
-        // Dynamically calculate dimensions based on viewport
-        const isMobile = window.innerWidth <= 600;
-        const a4WidthPx = 595; // A4 width in pixels at 72dpi
-        const a4HeightPx = 842; // A4 height in pixels at 72dpi
+        // A4 dimensions in pixels at 72dpi
+        const a4WidthPx = 595;
+        const a4HeightPx = 842;
 
-        // Clone the element to measure its full height without constraints
+        // Clone the element to measure its full dimensions without constraints
         const clone = element.cloneNode(true);
+        clone.style.width = `${a4WidthPx}px`; // Force A4 width
+        clone.style.maxWidth = 'none'; // Remove max-width constraint
         clone.style.maxHeight = 'none'; // Remove max-height constraint
         clone.style.height = 'auto'; // Allow natural height
         clone.style.position = 'absolute';
         clone.style.left = '-9999px';
         document.body.appendChild(clone);
 
-        // Wait for the clone to render and get its full height
-        await delay(500); // Give it a moment to render
-        const contentWidth = clone.scrollWidth;
+        // Wait for the clone to render and get its full dimensions
+        await delay(500);
+        const contentWidth = a4WidthPx; // Use A4 width directly
         const contentHeight = clone.scrollHeight;
         console.log('Content dimensions:', contentWidth, contentHeight);
 
         // Remove the clone
         document.body.removeChild(clone);
 
-        // Adjust scale for rendering
-        let scale;
-        if (isMobile) {
-            const viewportWidth = window.innerWidth;
-            const scaleWidth = viewportWidth / contentWidth;
-            scale = scaleWidth * 1.5; // Reduced scale for mobile
-            console.log('Mobile scale calculated:', scale);
-        } else {
-            const scaleWidth = a4WidthPx / contentWidth;
-            scale = scaleWidth * 2; // Desktop scale
-            console.log('Desktop scale calculated:', scale);
-        }
+        // Calculate scale to fit content within A4 width
+        const scale = 2; // Fixed scale for consistent rendering (adjust if needed)
+        console.log('Scale calculated:', scale);
 
         const opt = {
             margin: [10, 10, 10, 10], // Add margins to ensure content fits

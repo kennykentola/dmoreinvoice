@@ -8,14 +8,12 @@ body {
 .container {
     width: 100%;
     max-width: 595px; /* A4 width in pixels at 72dpi for desktop */
-    max-height: 842px; /* A4 height in pixels at 72dpi for desktop */
     margin: 0 auto;
     background: #fff;
     padding: 15px;
     border: 1px solid #ddd;
     position: relative;
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 .header {
@@ -86,6 +84,7 @@ body {
     flex-direction: column;
     gap: 5px;
 }
+
 
 .header-img.right-img {
     width: 60px;
@@ -388,10 +387,21 @@ td input {
     .container {
         width: 90vw; /* Use viewport width for mobile */
         max-width: none; /* Remove fixed max-width on mobile */
-        max-height: none; /* Remove fixed height on mobile */
         padding: 10px;
     }
-
+    .right-images {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: fit-content;
+    }
+    
+    .left-images {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: fit-content;
+    }
     .header h1 {
         font-size: 12px;
     }
@@ -510,7 +520,9 @@ td input {
     }
 
     .signature {
-        flex-direction: column;
+        display: flex;
+        justify-content: space-around;
+        /* flex-direction: column; */
         gap: 8px;
     }
 
@@ -560,7 +572,7 @@ td input {
 @media print {
     .container {
         width: 595px; /* A4 width in pixels */
-        height: 842px; /* A4 height in pixels */
+        height: auto; /* Allow height to expand for multi-page */
         margin: 0;
         padding: 15px;
         box-sizing: border-box;
@@ -577,7 +589,7 @@ td input {
     /* Adjust for mobile PDF rendering */
     @media (max-width: 600px) {
         .container {
-            width: 100%;
+            width: 595px; /* Force A4 width for PDF */
             height: auto;
             padding: 10px;
         }
@@ -635,6 +647,8 @@ td input {
         }
 
         .signature img {
+            display: flex;
+            justify-content: space-around;
             width: 60px;
             height: 30px;
         }
