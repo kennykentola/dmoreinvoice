@@ -6,12 +6,27 @@ const previewContent = document.getElementById('preview-content');
 let pdfBlob = null;
 let pdfBase64 = null;
 
-// Automatically set the current date
+// Load theme from localStorage or default to light
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+}
+
+// Toggle between light and dark themes
+function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+}
+
+// Automatically set the current date and load theme
 window.onload = function() {
     const today = new Date();
     document.getElementById('day').value = today.getDate();
     document.getElementById('month').value = today.getMonth() + 1; // Months are 0-based
     document.getElementById('year').value = today.getFullYear();
+    loadTheme();
 };
 
 // Function to convert number to words with proper "and" placement
@@ -215,6 +230,10 @@ async function generatePDF() {
     const deleteButton = document.getElementById('delete-customer-signature');
     let buttonParent = null;
     let buttonDisplayStyle = null;
+    const originalTheme = document.body.getAttribute('data-theme'); // Store current theme
+
+    // Force light theme for PDF generation
+    document.body.setAttribute('data-theme', 'light');
 
     // Store the button's parent and display style, then remove it from the DOM
     if (deleteButton) {
@@ -259,7 +278,7 @@ async function generatePDF() {
         document.body.removeChild(clone);
 
         // Calculate scale to fit content within A4 width
-        const scale = 2; // Fixed scale for consistent rendering (adjust if needed)
+        const scale = 2; // Fixed scale for consistent rendering
         console.log('Scale calculated:', scale);
 
         const opt = {
@@ -299,6 +318,9 @@ async function generatePDF() {
         alert('Failed to generate PDF. Please check the console for details and try again.');
         throw err;
     } finally {
+        // Restore the original theme after PDF generation
+        document.body.setAttribute('data-theme', originalTheme);
+
         // Restore the delete button to the DOM after PDF generation
         if (deleteButton && buttonParent) {
             buttonParent.appendChild(deleteButton);

@@ -70,7 +70,7 @@
                     <th>Description of Goods</th>
                     <th>Qty</th>
                     <th>Rate</th>
-                    <th>Amount<br>N K</th>
+                    <th>Amount<br><span>&#8358;</span> K</th>
                 </tr>
             </thead>
             <tbody id="items">
@@ -84,7 +84,7 @@
             </tbody>
         </table>
 
-        <div class="total">TOTAL N <span id="total">0</span></div>
+        <div class="total">TOTAL <span>&#8358;</span> <span id="total">0</span></div>
 
         <div class="note">
             <strong style="font-size: 10px;">Please Note:</strong><span style="font-weight:600;font-size: 8px;"> Goods sold in good condition are not returnable.<br>
@@ -113,6 +113,7 @@
     </div>
 
     <div class="buttons">
+        <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Light/Dark Mode</button>
         <button class="preview-btn" onclick="showPreview()">Preview Invoice</button>
         <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
         <a class="email-btn" id="email-link" href="#">Send via Email</a>

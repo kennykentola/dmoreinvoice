@@ -1,17 +1,51 @@
+/* Define CSS variables for light and dark themes */
+:root {
+    /* Light theme (default) */
+    --background-color: #f4f4f4;
+    --text-color: #000;
+    --container-bg: #fff;
+    --container-border: #ddd;
+    --input-bg: #fff;
+    --input-border: #ccc;
+    --table-header-bg: #f0f0f0;
+    --table-body-bg: #90ee90;
+    --note-color: #555;
+    --contact-form-bg: #f9f9f9;
+    --modal-bg: #fefefe;
+    --date-input-bg: #f0f0f0;
+}
+
+[data-theme="dark"] {
+    /* Dark theme */
+    --background-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --container-bg: #2c2c2c;
+    --container-border: #444;
+    --input-bg: #333;
+    --input-border: #555;
+    --table-header-bg: #444;
+    --table-body-bg: #3a5f3a;
+    --note-color: #aaa;
+    --contact-form-bg: #2c2c2c;
+    --modal-bg: #333;
+    --date-input-bg: #444;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 5px;
-    background-color: #f4f4f4;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 .container {
     width: 100%;
     max-width: 595px; /* A4 width in pixels at 72dpi for desktop */
     margin: 0 auto;
-    background: #fff;
+    background: var(--container-bg);
     padding: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--container-border);
     position: relative;
     box-sizing: border-box;
 }
@@ -85,7 +119,6 @@ body {
     gap: 5px;
 }
 
-
 .header-img.right-img {
     width: 60px;
     height: auto;
@@ -126,6 +159,9 @@ body {
     width: 100px;
     padding: 2px;
     font-size: 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
 }
 
 .date {
@@ -141,9 +177,10 @@ body {
 .date input {
     width: 40px;
     padding: 2px;
-    background: #f0f0f0;
+    background: var(--date-input-bg);
     font-size: 12px;
     text-align: center;
+    color: var(--text-color);
 }
 
 table {
@@ -159,12 +196,12 @@ th, td {
 }
 
 th {
-    background-color: #f0f0f0;
+    background-color: var(--table-header-bg);
     font-size: 12px;
 }
 
 tbody {
-    background-color: #90ee90; /* Light green background for table body */
+    background-color: var(--table-body-bg);
 }
 
 td input {
@@ -172,6 +209,8 @@ td input {
     border: none;
     text-align: center;
     font-size: 12px;
+    background: var(--input-bg);
+    color: var(--text-color);
 }
 
 .total {
@@ -183,16 +222,34 @@ td input {
 
 .note {
     font-size: 8px;
-    color: #555;
+    color: var(--note-color);
     margin-bottom: 10px;
+}
+
+.note strong {
+    font-size: 10px;
+    color: var(--note-color);
+}
+
+.note span {
+    font-weight: 600;
+    font-size: 8px;
+    color: var(--note-color);
+}
+
+.note h3 {
+    font-size: 12px;
+    margin: 5px 0;
+    color: var(--text-color);
 }
 
 .note input {
     width: 100%;
     padding: 2px;
     font-size: 8px;
-    border: none; /* Remove border for Amount in words */
-    background: transparent; /* Ensure background matches the container */
+    border: none;
+    background: transparent;
+    color: var(--note-color);
 }
 
 .signature {
@@ -221,6 +278,9 @@ td input {
     font-size: 8px;
     text-align: center;
     margin-top: 5px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
 }
 
 #delete-customer-signature {
@@ -264,6 +324,14 @@ td input {
     display: inline-block;
 }
 
+.theme-toggle-btn {
+    background: #666;
+}
+
+.theme-toggle-btn:hover {
+    background: #555;
+}
+
 .preview-btn {
     background: #4CAF50;
 }
@@ -282,7 +350,7 @@ td input {
 
 .upload-section {
     margin-bottom: 8px;
-    text-align: center; /* Center the upload section */
+    text-align: center;
 }
 
 .upload-section label {
@@ -292,9 +360,11 @@ td input {
 
 .upload-section input {
     display: inline-block;
-    width: auto; /* Prevent stretching */
+    width: auto;
     padding: 2px;
     font-size: 10px;
+    background: var(--input-bg);
+    color: var(--text-color);
 }
 
 .background-img {
@@ -311,13 +381,14 @@ td input {
 .contact-form {
     margin-bottom: 8px;
     padding: 5px;
-    border: 1px solid #ddd;
-    background: #f9f9f9;
-    text-align: center; /* Center the form content */
+    border: 1px solid var(--container-border);
+    background: var(--contact-form-bg);
+    text-align: center;
 }
 
 .contact-form h3 {
     margin-bottom: 10px;
+    color: var(--text-color);
 }
 
 .contact-form label {
@@ -326,11 +397,14 @@ td input {
 }
 
 .contact-form input {
-    width: 250px; /* Fixed width to prevent stretching */
+    width: 250px;
     padding: 2px;
-    margin: 0 auto 5px auto; /* Center the input */
+    margin: 0 auto 5px auto;
     display: block;
     font-size: 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
 }
 
 /* Modal for Preview */
@@ -347,12 +421,13 @@ td input {
 }
 
 .modal-content {
-    background-color: #fefefe;
+    background-color: var(--modal-bg);
     margin: 5% auto;
     padding: 12px;
-    border: 1px solid #888;
+    border: 1px solid var(--container-border);
     width: 90%;
     max-width: 900px;
+    color: var(--text-color);
 }
 
 .close {
@@ -365,7 +440,7 @@ td input {
 
 .close:hover,
 .close:focus {
-    color: black;
+    color: var(--text-color);
     text-decoration: none;
 }
 
@@ -385,10 +460,11 @@ td input {
 /* Mobile Responsiveness */
 @media (max-width: 600px) {
     .container {
-        width: 90vw; /* Use viewport width for mobile */
-        max-width: none; /* Remove fixed max-width on mobile */
+        width: 90vw;
+        max-width: none;
         padding: 10px;
     }
+
     .right-images {
         display: flex;
         flex-direction: column;
@@ -402,6 +478,7 @@ td input {
         gap: 5px;
         width: fit-content;
     }
+
     .header h1 {
         font-size: 12px;
     }
@@ -515,6 +592,18 @@ td input {
         font-size: 6px;
     }
 
+    .note strong {
+        font-size: 10px;
+    }
+
+    .note span {
+        font-size: 8px;
+    }
+
+    .note h3 {
+        font-size: 10px;
+    }
+
     .note input {
         font-size: 6px;
     }
@@ -522,7 +611,6 @@ td input {
     .signature {
         display: flex;
         justify-content: space-around;
-        /* flex-direction: column; */
         gap: 8px;
     }
 
@@ -564,18 +652,62 @@ td input {
     }
 
     .contact-form input {
-        width: 200px; /* Slightly smaller on mobile */
+        width: 200px;
     }
 }
 
-/* Ensure PDF rendering */
+/* Ensure PDF rendering always uses light theme */
 @media print {
+    body {
+        background-color: #f4f4f4;
+        color: #000;
+    }
+
     .container {
-        width: 595px; /* A4 width in pixels */
-        height: auto; /* Allow height to expand for multi-page */
+        width: 595px;
+        height: auto;
         margin: 0;
         padding: 15px;
+        background: #fff;
+        border: 1px solid #ddd;
         box-sizing: border-box;
+    }
+
+    .recipient input, .date input, td input, .signature input, .note input, .contact-form input {
+        background: #fff;
+        border: 1px solid #ccc;
+        color: #000;
+    }
+
+    .date input {
+        background: #f0f0f0;
+    }
+
+    th {
+        background-color: #f0f0f0;
+    }
+
+    tbody {
+        background-color: #90ee90;
+    }
+
+    .note, .note strong, .note span, .note input {
+        color: #555;
+    }
+
+    .note h3 {
+        color: #000;
+    }
+
+    .contact-form {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        border: 1px solid #888;
+        color: #000;
     }
 
     .header, .invoice-title, .recipient, table, .total, .note, .signature {
@@ -583,13 +715,12 @@ td input {
     }
 
     #delete-customer-signature {
-        display: none !important; /* Hide the delete button in PDF */
+        display: none !important;
     }
 
-    /* Adjust for mobile PDF rendering */
     @media (max-width: 600px) {
         .container {
-            width: 595px; /* Force A4 width for PDF */
+            width: 595px;
             height: auto;
             padding: 10px;
         }
@@ -640,6 +771,18 @@ td input {
 
         .note, .note input {
             font-size: 6px;
+        }
+
+        .note strong {
+            font-size: 10px;
+        }
+
+        .note span {
+            font-size: 8px;
+        }
+
+        .note h3 {
+            font-size: 10px;
         }
 
         .signature label {
