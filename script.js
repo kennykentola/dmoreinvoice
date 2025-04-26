@@ -234,34 +234,46 @@ async function generatePDF() {
         const isMobile = window.innerWidth <= 600;
         const a4WidthPx = 595; // A4 width in pixels at 72dpi
         const a4HeightPx = 842; // A4 height in pixels at 72dpi
-        const contentWidth = element.scrollWidth;
-        const contentHeight = element.scrollHeight;
 
-        // Adjust scale for mobile devices
+        // Clone the element to measure its full height without constraints
+        const clone = element.cloneNode(true);
+        clone.style.maxHeight = 'none'; // Remove max-height constraint
+        clone.style.height = 'auto'; // Allow natural height
+        clone.style.position = 'absolute';
+        clone.style.left = '-9999px';
+        document.body.appendChild(clone);
+
+        // Wait for the clone to render and get its full height
+        await delay(500); // Give it a moment to render
+        const contentWidth = clone.scrollWidth;
+        const contentHeight = clone.scrollHeight;
+        console.log('Content dimensions:', contentWidth, contentHeight);
+
+        // Remove the clone
+        document.body.removeChild(clone);
+
+        // Adjust scale for rendering
         let scale;
         if (isMobile) {
             const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
             const scaleWidth = viewportWidth / contentWidth;
-            const scaleHeight = viewportHeight / contentHeight;
-            scale = Math.min(scaleWidth, scaleHeight) * 1.5; // Reduced scale for mobile
+            scale = scaleWidth * 1.5; // Reduced scale for mobile
             console.log('Mobile scale calculated:', scale);
         } else {
             const scaleWidth = a4WidthPx / contentWidth;
-            const scaleHeight = a4HeightPx / contentHeight;
-            scale = Math.min(scaleWidth, scaleHeight) * 2; // Desktop scale
+            scale = scaleWidth * 2; // Desktop scale
             console.log('Desktop scale calculated:', scale);
         }
 
         const opt = {
-            margin: 0,
+            margin: [10, 10, 10, 10], // Add margins to ensure content fits
             filename: 'invoice.pdf',
             image: { type: 'png', quality: 1.0 }, // Use PNG for better quality
             html2canvas: { 
                 scale: scale,
                 useCORS: true,
                 width: contentWidth,
-                height: contentHeight,
+                height: contentHeight, // Use the full content height
                 scrollX: 0,
                 scrollY: 0,
                 logging: true,
@@ -270,12 +282,12 @@ async function generatePDF() {
             },
             jsPDF: { 
                 unit: 'px', 
-                format: isMobile ? [contentWidth * scale, contentHeight * scale] : [a4WidthPx, a4HeightPx],
+                format: [a4WidthPx, a4HeightPx], // Always use A4 dimensions
                 orientation: 'portrait',
                 putOnlyUsedFonts: true,
                 compress: false // Disable compression for better quality
             },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'], after: '.page-break' }
         };
 
         console.log('Generating PDF with options:', opt);
@@ -376,16 +388,25 @@ document.getElementById('email-link-modal').addEventListener('click', async (e) 
 document.getElementById('whatsapp-link').addEventListener('click', async (e) => {
     e.preventDefault();
     try {
+        // Generate and download the PDF first
         if (!pdfBlob) await generatePDF();
-        if (pdfBlob && pdfBase64) {
+        if (pdfBlob) {
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+            console.log('PDF downloaded for WhatsApp');
+
+            // Open a WhatsApp link with instructions to attach the downloaded PDF
             const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
-            const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
-            const message = encodeURIComponent('Here is your invoice from D\'More Tech. Download it here: ' + dataUrl + '\n\nSent from: dmoretech44@gmail.com');
+            const message = encodeURIComponent('Here is your invoice from D\'More Tech. I have downloaded the invoice PDF for you (named "invoice.pdf"). Please attach it to this chat and send.\n\nSent from: dmoretech44@gmail.com');
             const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
             window.open(whatsappLink, '_blank');
-            console.log('WhatsApp link opened:', whatsappLink);
+            console.log('WhatsApp link opened with instructions:', whatsappLink);
         } else {
-            throw new Error('PDF blob or base64 not available');
+            throw new Error('PDF blob not available');
         }
     } catch (err) {
         console.error('Error sending WhatsApp message:', err);
