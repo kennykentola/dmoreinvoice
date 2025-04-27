@@ -112,19 +112,6 @@ itemsTable.addEventListener('input', (e) => {
     const amountInput = row.querySelector('.amount');
     amountInput.value = quantity * rate;
     calculateTotal();
-
-    // Add a new row if the current row is the last one and either quantity or rate is filled
-    if (row === itemsTable.lastElementChild && (quantityInput.value || rateInput.value)) {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td><input type="text" class="sno"></td>
-            <td><input type="text" class="description"></td>
-            <td><input type="text" class="quantity"></td>
-            <td><input type="text" class="rate"></td>
-            <td><input type="text" class="amount" readonly></td>
-        `;
-        itemsTable.appendChild(newRow);
-    }
 });
 
 let customerSignatures = [];
@@ -147,9 +134,9 @@ document.getElementById('signature-upload').addEventListener('change', (e) => {
             const img = document.createElement('img');
             img.src = reader.result;
             img.alt = 'Customer Signature';
-            img.style.width = '80px';
-            img.style.height = '40px';
-            img.style.marginTop = '5px';
+            img.style.width = '60px';
+            img.style.height = '30px';
+            img.style.marginTop = '3px';
             img.classList.add('customer-signature');
             container.appendChild(img);
             customerSignatures.push(img);
@@ -258,50 +245,53 @@ async function generatePDF() {
         const a4WidthPx = 595;
         const a4HeightPx = 842;
 
-        // Clone the element to measure its full dimensions without constraints
+        // Clone the element to measure its full dimensions
         const clone = element.cloneNode(true);
         clone.style.width = `${a4WidthPx}px`; // Force A4 width
-        clone.style.maxWidth = 'none'; // Remove max-width constraint
-        clone.style.maxHeight = 'none'; // Remove max-height constraint
-        clone.style.height = 'auto'; // Allow natural height
+        clone.style.maxWidth = 'none';
+        clone.style.maxHeight = `${a4HeightPx}px`; // Force A4 height
+        clone.style.height = 'auto';
         clone.style.position = 'absolute';
         clone.style.left = '-9999px';
+        clone.style.transform = 'scale(1)';
+        clone.style.overflow = 'hidden'; // Prevent overflow in PDF
         document.body.appendChild(clone);
 
-        // Wait for the clone to render and get its full dimensions
+        // Wait for the clone to render and get its dimensions
         await delay(500);
-        const contentWidth = a4WidthPx; // Use A4 width directly
-        const contentHeight = clone.scrollHeight;
+        const contentWidth = a4WidthPx;
+        const contentHeight = Math.min(clone.scrollHeight, a4HeightPx); // Cap at A4 height
         console.log('Content dimensions:', contentWidth, contentHeight);
 
         // Remove the clone
         document.body.removeChild(clone);
 
-        // Calculate scale to fit content within A4 width
-        const scale = 2; // Fixed scale for consistent rendering
+        // Calculate scale for better rendering
+        const scale = 4;
         console.log('Scale calculated:', scale);
 
         const opt = {
-            margin: [10, 10, 10, 10], // Add margins to ensure content fits
+            margin: 0,
             filename: 'invoice.pdf',
-            image: { type: 'png', quality: 1.0 }, // Use PNG for better quality
+            image: { type: 'png', quality: 1.0 },
             html2canvas: { 
                 scale: scale,
                 useCORS: true,
                 width: contentWidth,
-                height: contentHeight, // Use the full content height
+                height: contentHeight,
                 scrollX: 0,
                 scrollY: 0,
                 logging: true,
-                dpi: 300, // Increase DPI for better resolution
-                letterRendering: true // Improve text rendering
+                dpi: 400,
+                letterRendering: true,
+                backgroundColor: '#ffffff'
             },
             jsPDF: { 
                 unit: 'px', 
-                format: [a4WidthPx, a4HeightPx], // Always use A4 dimensions
+                format: [a4WidthPx, a4HeightPx], // Strict A4 dimensions
                 orientation: 'portrait',
                 putOnlyUsedFonts: true,
-                compress: false // Disable compression for better quality
+                compress: false
             },
             pagebreak: { mode: ['css', 'legacy'], after: '.page-break' }
         };
@@ -310,7 +300,7 @@ async function generatePDF() {
         const pdf = await html2pdf().from(element).set(opt).toPdf().get('pdf');
         pdfBlob = pdf.output('blob');
         console.log('PDF blob generated:', pdfBlob);
-        pdfBase64 = await blobToBase64(pdfBlob); // Convert to base64
+        pdfBase64 = await blobToBase64(pdfBlob);
         console.log('PDF base64 generated');
         return pdfBlob;
     } catch (err) {
@@ -422,9 +412,6 @@ document.getElementById('whatsapp-link').addEventListener('click', async (e) => 
             // Open the WhatsApp link
             window.open(whatsappLink, '_blank');
             console.log('WhatsApp link opened with PDF URL:', whatsappLink);
-
-            // Note: The URL will be revoked when the page is refreshed or closed
-            // We don't revoke it immediately to allow the user to click the link
         } else {
             throw new Error('PDF blob not available');
         }
