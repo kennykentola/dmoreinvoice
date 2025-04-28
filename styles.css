@@ -205,7 +205,7 @@ th {
 }
 
 tbody {
-    background-color: var(--table-body-bg);
+    background-color: var(--input-border);
 }
 
 td input {
