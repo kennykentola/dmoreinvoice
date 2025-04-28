@@ -206,7 +206,7 @@ th {
 }
 
 tbody {
-    background-color: var(--input-border);
+    background-color: var(--modal-bg);
 }
 
 td input {
