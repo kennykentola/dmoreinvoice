@@ -6,17 +6,23 @@
     --container-border: #ddd;
     --input-bg: #fff;
     --input-border: #ccc;
-    --primary-color: #3398db; /* Added for button hover effect */
+    --primary-color: #3398db; /* For button and input hover/focus effect */
+    --button-bg: #388E3C; /* Darker green */
+    --button-hover-shadow: rgba(51, 152, 219, 0.5); /* Hover shadow color */
+    --input-hover-border: #999; /* Slightly darker gray for hover in light mode */
 }
 
 [data-theme="dark"] {
-    --background-color: #ffffff;
-    --text-color: #3b3636;
+    --background-color: #f5f1f1;
+    --text-color: #1d1919;
     --container-bg: #2c2c2c;
     --container-border: #444;
     --input-bg: #333;
     --input-border: #555;
     --primary-color: #66b0ff; /* Lighter blue for dark theme */
+    --button-bg: #2E7D32; /* Darker green for dark theme */
+    --button-hover-shadow: rgba(102, 176, 255, 0.5); /* Lighter shadow for dark theme */
+    --input-hover-border: #777; /* Slightly lighter gray for hover in dark mode */
 }
 
 body {
@@ -37,16 +43,16 @@ body {
     align-items: center;
     text-align: center;
     max-width: 400px;
-    padding: 20px;
+    padding: 30px; /* Increased padding for better spacing */
     background: var(--container-bg);
     border: 1px solid var(--container-border);
     background: rgba(240, 241, 240, 0.8);
-    border-radius: 10px;
+    border-radius: 15px; /* Slightly larger border radius */
     box-shadow: 0 0.4px 0.4px rgba(128, 128, 128, 0.109), 0 1px 1px rgba(128, 128, 128, 0.155), 0 2.1px 2.1px rgba(128, 128, 128, 0.195), 0 4.4px 4.4px rgba(128, 128, 128, 0.241), 0 12px 12px rgba(128, 128, 128, 0.35);
 }
 
 .login-container h2 {
-    margin-bottom: 20px;
+    margin-bottom: 25px; /* Increased margin for better spacing */
     font-size: 24px;
     color: var(--text-color);
 }
@@ -54,36 +60,59 @@ body {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px; /* Increased gap for better form spacing */
     width: 100%;
-    color: var(--text-color);
 }
 
 .login-form label {
     text-align: left;
     font-size: 14px;
+    font-weight: bold; /* Make labels slightly bolder */
+    color: var(--text-color);
 }
 
 .login-form input {
-    padding: 8px;
+    padding: 10px; /* Slightly increased padding for better input appearance */
     font-size: 14px;
     border: 1px solid var(--input-border);
-    border-radius: 3px;
+    border-radius: 5px; /* Slightly larger border radius */
     background: var(--input-bg);
-    color: var(--text-color);
+    /* Default text color based on theme */
+    color: #000; /* Black in light mode by default */
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Ensure input text color in dark mode is white */
+[data-theme="dark"] .login-form input {
+    color: #fff; /* White in dark mode for better visibility */
+}
+
+/* Hover state for input */
+.login-form input:hover {
+    border-color: var(--input-hover-border); /* Slightly darker/lighter border on hover */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for hover effect */
+}
+
+/* Focus state for input */
+.login-form input:focus {
+    border-color: var(--primary-color); /* Highlight border on focus */
+    outline: none;
+    box-shadow: 0 0 5px var(--primary-color); /* Subtle glow effect on focus */
+    /* Text color remains the same as default (black in light, white in dark) */
 }
 
 .login-form button {
-    position: relative; /* Required for ::before positioning */
-    padding: 10px;
-    background: #4CAF50;
+    position: relative;
+    padding: 12px; /* Increased padding for a larger button */
+    background: var(--button-bg); /* Use variable for button background */
     color: var(--text-color);
     border: none;
-    border-radius: 3px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    overflow: hidden; /* Ensure the ::before gradient doesn't overflow */
-    transition: background 0.3s, box-shadow 0.3s;
+    font-weight: bold; /* Make button text bolder */
+    overflow: hidden;
+    transition: background 0.3s, box-shadow 0.3s, transform 0.1s; /* Added transform for click effect */
 }
 
 .login-form button::before {
@@ -100,14 +129,24 @@ body {
 
 .login-form button:hover {
     background: transparent;
-    box-shadow: 0 0 20px 10px rgba(51, 152, 219, 0.5);
+    box-shadow: 0 0 20px 10px var(--button-hover-shadow);
+    color: var(--text-color); /* Change text color on hover */
 }
 
 .login-form button:hover::before {
     transform: translateX(100%);
 }
 
-.login-form p {
-    margin-top: 10px;
+.login-form button:active {
+    transform: scale(0.95); /* Slight scale-down effect on click */
+}
+
+.login-form p#error-message {
+    margin-top: 15px;
+    padding: 8px;
     font-size: 14px;
+    background: rgba(255, 0, 0, 0.1); /* Light red background for error */
+    border: 1px solid rgba(255, 0, 0, 0.3); /* Subtle red border */
+    border-radius: 5px;
+    color: #d32f2f; /* Darker red text for contrast */
 }
