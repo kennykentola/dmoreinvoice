@@ -10,6 +10,13 @@ let pdfBase64 = null;
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+// Update the theme icon based on the current theme
+function updateThemeIcon(theme) {
+    const themeIcon = document.querySelector('.theme-icon');
+    themeIcon.textContent = theme === 'light' ? '☀️' : '🌙';
 }
 
 // Toggle between light and dark themes
@@ -18,6 +25,7 @@ function toggleTheme() {
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.body.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
 }
 
 // Automatically set the current date and load theme
@@ -28,6 +36,50 @@ window.onload = function() {
     document.getElementById('year').value = today.getFullYear();
     loadTheme();
 };
+
+// Function to add new rows (2 at a time)
+function addRows() {
+    const tbody = document.getElementById('items');
+    for (let i = 0; i < 2; i++) {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" class="sno"></td>
+            <td><input type="text" class="description"></td>
+            <td><input type="text" class="quantity"></td>
+            <td><input type="text" class="rate"></td>
+            <td><input type="text" class="amount" readonly></td>
+        `;
+        tbody.appendChild(newRow);
+        // Attach event listeners to the new row
+        newRow.querySelectorAll('.quantity, .rate').forEach(input => {
+            input.addEventListener('input', handleRowInput);
+        });
+    }
+}
+
+// Function to handle row input and auto-add rows
+function handleRowInput(e) {
+    const row = e.target.closest('tr');
+    const quantityInput = row.querySelector('.quantity');
+    const rateInput = row.querySelector('.rate');
+    const quantity = parseFloat(quantityInput.value) || 0;
+    const rate = parseFloat(rateInput.value) || 0;
+    const amountInput = row.querySelector('.amount');
+    amountInput.value = quantity * rate;
+    calculateTotal();
+
+    // Check if the current row is the second-to-last row
+    const rows = document.querySelectorAll('#items tr');
+    const rowIndex = Array.from(rows).indexOf(row);
+    if (rowIndex === rows.length - 2 && (quantity || rate)) {
+        addRows();
+    }
+}
+
+// Attach initial event listeners to existing rows
+document.querySelectorAll('#items .quantity, #items .rate').forEach(input => {
+    input.addEventListener('input', handleRowInput);
+});
 
 // Function to convert number to words with proper "and" placement
 function numberToWords(num) {
@@ -45,7 +97,7 @@ function numberToWords(num) {
 
         if (hundreds > 0) {
             words += units[hundreds] + ' Hundred';
-            if (n > 0) words += ' and '; // Add "and" if there are more digits
+            if (n > 0) words += ' and ';
         }
 
         if (n >= 20) {
@@ -71,7 +123,6 @@ function numberToWords(num) {
             if (chunkCount > 0) {
                 chunkWords += ' ' + thousands[chunkCount];
             }
-            // Add "and" before the last chunk if there are higher chunks and the last chunk is less than 100
             if (words && chunk < 100) {
                 words = chunkWords + ' and ' + words;
             } else {
@@ -93,7 +144,6 @@ function calculateTotal() {
     });
     totalSpan.textContent = total;
 
-    // Convert total to words and update the input
     const totalStr = total.toString();
     const [naira, kobo = '00'] = totalStr.split('.');
     const nairaWords = numberToWords(parseInt(naira));
@@ -102,17 +152,6 @@ function calculateTotal() {
     document.getElementById('customer-signature-naira').value = nairaWords;
     document.getElementById('customer-signature-kobo').value = koboWords;
 }
-
-itemsTable.addEventListener('input', (e) => {
-    const row = e.target.closest('tr');
-    const quantityInput = row.querySelector('.quantity');
-    const rateInput = row.querySelector('.rate');
-    const quantity = parseFloat(quantityInput.value) || 0;
-    const rate = parseFloat(rateInput.value) || 0;
-    const amountInput = row.querySelector('.amount');
-    amountInput.value = quantity * rate;
-    calculateTotal();
-});
 
 let customerSignatures = [];
 document.getElementById('signature-upload').addEventListener('change', (e) => {
@@ -124,7 +163,6 @@ document.getElementById('signature-upload').addEventListener('change', (e) => {
     const koboInput = document.getElementById('customer-signature-kobo');
     const deleteButton = document.getElementById('delete-customer-signature');
 
-    // Limit to 2 signatures
     const remainingSlots = 2 - customerSignatures.length;
     const filesToAdd = Array.from(files).slice(0, remainingSlots);
 
@@ -134,26 +172,21 @@ document.getElementById('signature-upload').addEventListener('change', (e) => {
             const img = document.createElement('img');
             img.src = reader.result;
             img.alt = 'Customer Signature';
-            img.style.width = '60px';
-            img.style.height = '30px';
-            img.style.marginTop = '3px';
             img.classList.add('customer-signature');
             container.appendChild(img);
             customerSignatures.push(img);
 
-            // Hide Naira and Kobo inputs if signatures are present
             nairaInput.style.display = 'none';
             koboInput.style.display = 'none';
             deleteButton.style.display = 'block';
 
-            // Clear the input to allow re-uploading
             e.target.value = '';
         };
         reader.readAsDataURL(file);
     });
 
     if (customerSignatures.length >= 2) {
-        e.target.disabled = true; // Disable further uploads
+        e.target.disabled = true;
     }
 });
 
@@ -164,13 +197,60 @@ function deleteCustomerSignature() {
     const deleteButton = document.getElementById('delete-customer-signature');
     const uploadInput = document.getElementById('signature-upload');
 
-    // Clear all customer signatures
     container.innerHTML = '';
     customerSignatures = [];
     nairaInput.style.display = 'block';
     koboInput.style.display = 'block';
     deleteButton.style.display = 'none';
-    uploadInput.disabled = false; // Re-enable the upload input
+    uploadInput.disabled = false;
+
+    const customerSignatureType = document.querySelector('input[name="customer-signature-type"]:checked')?.value || 'image';
+    if (customerSignatureType === 'text') {
+        document.getElementById('customer-signature-name').style.display = 'block';
+        nairaInput.style.display = 'none';
+        koboInput.style.display = 'none';
+    }
+}
+
+function toggleCustomerSignatureType(type) {
+    const container = document.getElementById('customer-signature-container');
+    const nameInput = document.getElementById('customer-signature-name');
+    const nairaInput = document.getElementById('customer-signature-naira');
+    const koboInput = document.getElementById('customer-signature-kobo');
+    const deleteButton = document.getElementById('delete-customer-signature');
+    const uploadInput = document.getElementById('signature-upload');
+
+    if (type === 'text') {
+        container.style.display = 'none';
+        nameInput.style.display = 'block';
+        nairaInput.style.display = 'none';
+        koboInput.style.display = 'none';
+        deleteButton.style.display = 'none';
+        uploadInput.disabled = true;
+        customerSignatures = [];
+    } else {
+        container.style.display = 'flex';
+        nameInput.style.display = 'none';
+        if (customerSignatures.length === 0) {
+            nairaInput.style.display = 'block';
+            koboInput.style.display = 'block';
+        }
+        uploadInput.disabled = false;
+    }
+}
+
+function toggleManagerSignatureType(type) {
+    const container = document.getElementById('manager-signature-container');
+    const nameInput = document.getElementById('manager-signature-name');
+    const signatureImg = document.getElementById('manager-signature');
+
+    if (type === 'text') {
+        signatureImg.style.display = 'none';
+        nameInput.style.display = 'block';
+    } else {
+        signatureImg.style.display = 'block';
+        nameInput.style.display = 'none';
+    }
 }
 
 function delay(ms) {
@@ -180,27 +260,34 @@ function delay(ms) {
 async function waitForImages(element) {
     const images = element.querySelectorAll('img');
     const promises = Array.from(images).map(img => {
-        if (img.complete) return Promise.resolve();
         return new Promise(resolve => {
-            img.onload = () => {
-                console.log(`Image loaded: ${img.src}`);
+            if (img.complete && img.naturalHeight !== 0) {
+                console.log(`Image already loaded: ${img.src}`);
                 resolve();
-            };
-            img.onerror = () => {
-                console.error(`Failed to load image: ${img.src}`);
-                resolve(); // Resolve even on error to avoid blocking
-            };
+            } else {
+                img.onload = () => {
+                    console.log(`Image loaded: ${img.src}`);
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load image: ${img.src}`);
+                    resolve(); // Resolve even on error to avoid blocking PDF generation
+                };
+                // Trigger load if src is already set
+                if (img.src) {
+                    img.src = img.src; // Force reload to trigger events
+                }
+            }
         });
     });
     return Promise.all(promises);
 }
 
-// Convert blob to base64
 function blobToBase64(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-            const base64String = reader.result.split(',')[1]; // Extract base64 part
+            const base64String = reader.result.split(',')[1];
             console.log('Blob converted to base64 successfully');
             resolve(base64String);
         };
@@ -217,12 +304,104 @@ async function generatePDF() {
     const deleteButton = document.getElementById('delete-customer-signature');
     let buttonParent = null;
     let buttonDisplayStyle = null;
-    const originalTheme = document.body.getAttribute('data-theme'); // Store current theme
+    const originalTheme = document.body.getAttribute('data-theme');
 
-    // Force light theme for PDF generation
     document.body.setAttribute('data-theme', 'light');
 
-    // Store the button's parent and display style, then remove it from the DOM
+    // Clone the invoice element to manipulate it for PDF generation
+    const clone = element.cloneNode(true);
+
+    // Hide the signature options (radio buttons) in the clone
+    clone.querySelectorAll('.signature-options').forEach(options => {
+        options.style.display = 'none';
+    });
+
+    // Handle Customer Signature: Show only the selected option
+    const customerSignatureRadio = document.querySelector('input[name="customer-signature-type"]:checked');
+    const customerSignatureType = customerSignatureRadio ? customerSignatureRadio.value : 'image'; // Default to 'image' if none selected
+    const customerCloneContainer = clone.querySelector('#customer-signature-container');
+    const customerCloneNameInput = clone.querySelector('#customer-signature-name');
+    const customerCloneNairaInput = clone.querySelector('#customer-signature-naira');
+    const customerCloneKoboInput = clone.querySelector('#customer-signature-kobo');
+    const customerCloneDeleteButton = clone.querySelector('#delete-customer-signature');
+
+    if (customerSignatureType === 'text') {
+        customerCloneContainer.style.display = 'none';
+        customerCloneNameInput.style.display = 'block';
+        customerCloneNairaInput.style.display = 'none';
+        customerCloneKoboInput.style.display = 'none';
+    } else {
+        customerCloneContainer.style.display = 'flex';
+        customerCloneNameInput.style.display = 'none';
+        if (customerCloneContainer.children.length === 0) {
+            customerCloneNairaInput.style.display = 'block';
+            customerCloneKoboInput.style.display = 'block';
+        } else {
+            customerCloneNairaInput.style.display = 'none';
+            customerCloneKoboInput.style.display = 'none';
+        }
+    }
+    if (customerCloneDeleteButton) {
+        customerCloneDeleteButton.style.display = 'none';
+    }
+
+    // Handle Manager Signature: Show only the selected option
+    const managerSignatureRadio = document.querySelector('input[name="manager-signature-type"]:checked');
+    const managerSignatureType = managerSignatureRadio ? managerSignatureRadio.value : 'image'; // Default to 'image' if none selected
+    const managerCloneContainer = clone.querySelector('#manager-signature-container');
+    const managerCloneNameInput = clone.querySelector('#manager-signature-name');
+    const managerCloneSignatureImg = clone.querySelector('#manager-signature');
+
+    if (managerSignatureType === 'text') {
+        managerCloneSignatureImg.style.display = 'none';
+        managerCloneNameInput.style.display = 'block';
+    } else {
+        managerCloneSignatureImg.style.display = 'block';
+        managerCloneNameInput.style.display = 'none';
+    }
+
+    // Copy input values and replace inputs with spans *after* applying visibility logic
+    const cloneInputs = clone.querySelectorAll('input');
+    cloneInputs.forEach(input => {
+        if (input.style.display === 'none') {
+            input.parentNode.removeChild(input); // Remove hidden inputs to avoid rendering issues
+            return;
+        }
+        const span = document.createElement('span');
+        span.textContent = input.value || '';
+        span.style.display = 'inline-block';
+        span.style.minWidth = input.offsetWidth + 'px';
+        span.style.minHeight = input.offsetHeight + 'px';
+        span.style.textAlign = input.style.textAlign || 'center';
+        span.style.padding = input.style.padding || '2px';
+        span.style.fontSize = input.style.fontSize || 'inherit';
+        span.style.color = getComputedStyle(input).color;
+        span.style.background = getComputedStyle(input).background;
+        span.style.border = getComputedStyle(input).border;
+        input.parentNode.replaceChild(span, input);
+    });
+
+    // Copy textarea values (if any)
+    const cloneTextareas = clone.querySelectorAll('textarea');
+    cloneTextareas.forEach(textarea => {
+        if (textarea.style.display === 'none') {
+            textarea.parentNode.removeChild(textarea);
+            return;
+        }
+        const div = document.createElement('div');
+        div.textContent = textarea.value || '';
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.minWidth = textarea.offsetWidth + 'px';
+        div.style.minHeight = textarea.offsetHeight + 'px';
+        div.style.padding = textarea.style.padding || '2px';
+        div.style.fontSize = textarea.style.fontSize || 'inherit';
+        div.style.color = getComputedStyle(textarea).color;
+        div.style.background = getComputedStyle(textarea).background;
+        div.style.border = getComputedStyle(textarea).border;
+        textarea.parentNode.replaceChild(div, textarea);
+    });
+
+    // Temporarily remove the delete button from the original DOM during PDF generation
     if (deleteButton) {
         buttonParent = deleteButton.parentElement;
         buttonDisplayStyle = deleteButton.style.display;
@@ -230,45 +409,31 @@ async function generatePDF() {
     }
 
     try {
-        // Scroll to the top to ensure the header is in view
         window.scrollTo(0, 0);
+        await waitForImages(clone);
+        await delay(1000);
 
-        // Wait for images to load
-        console.log('Waiting for images to load...');
-        await waitForImages(element);
-
-        // Additional delay to ensure all content is rendered
-        console.log('Adding delay for rendering...');
-        await delay(2000);
-
-        // A4 dimensions in pixels at 72dpi
         const a4WidthPx = 595;
         const a4HeightPx = 842;
 
-        // Clone the element to measure its full dimensions
-        const clone = element.cloneNode(true);
-        clone.style.width = `${a4WidthPx}px`; // Force A4 width
+        // Ensure the clone is visible to html2canvas
+        clone.style.width = `${a4WidthPx}px`;
         clone.style.maxWidth = 'none';
-        clone.style.maxHeight = `${a4HeightPx}px`; // Force A4 height
         clone.style.height = 'auto';
         clone.style.position = 'absolute';
-        clone.style.left = '-9999px';
-        clone.style.transform = 'scale(1)';
-        clone.style.overflow = 'hidden'; // Prevent overflow in PDF
+        clone.style.left = '0';
+        clone.style.top = '0';
+        clone.style.visibility = 'hidden';
+        clone.style.transform = 'none';
+        clone.style.overflow = 'visible';
         document.body.appendChild(clone);
 
-        // Wait for the clone to render and get its dimensions
         await delay(500);
+
         const contentWidth = a4WidthPx;
-        const contentHeight = Math.min(clone.scrollHeight, a4HeightPx); // Cap at A4 height
-        console.log('Content dimensions:', contentWidth, contentHeight);
+        const contentHeight = clone.scrollHeight;
 
-        // Remove the clone
-        document.body.removeChild(clone);
-
-        // Calculate scale for better rendering
-        const scale = 4;
-        console.log('Scale calculated:', scale);
+        const scale = 2;
 
         const opt = {
             margin: 0,
@@ -282,13 +447,20 @@ async function generatePDF() {
                 scrollX: 0,
                 scrollY: 0,
                 logging: true,
-                dpi: 400,
+                dpi: 300,
                 letterRendering: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                onclone: (clonedDoc) => {
+                    console.log('html2canvas cloned document:', clonedDoc);
+                    clonedDoc.querySelectorAll('*').forEach(el => {
+                        el.style.visibility = 'visible';
+                        el.style.display = el.style.display === 'none' ? 'none' : el.style.display;
+                    });
+                }
             },
             jsPDF: { 
                 unit: 'px', 
-                format: [a4WidthPx, a4HeightPx], // Strict A4 dimensions
+                format: [a4WidthPx, contentHeight],
                 orientation: 'portrait',
                 putOnlyUsedFonts: true,
                 compress: false
@@ -296,26 +468,23 @@ async function generatePDF() {
             pagebreak: { mode: ['css', 'legacy'], after: '.page-break' }
         };
 
-        console.log('Generating PDF with options:', opt);
-        const pdf = await html2pdf().from(element).set(opt).toPdf().get('pdf');
+        console.log('Starting PDF generation...');
+        const pdf = await html2pdf().from(clone).set(opt).toPdf().get('pdf');
         pdfBlob = pdf.output('blob');
-        console.log('PDF blob generated:', pdfBlob);
         pdfBase64 = await blobToBase64(pdfBlob);
-        console.log('PDF base64 generated');
+        console.log('PDF generated successfully');
         return pdfBlob;
     } catch (err) {
         console.error('Error in generatePDF:', err);
-        alert('Failed to generate PDF. Please check the console for details and try again.');
-        throw err;
+        throw err; // Re-throw to be caught by the calling function
     } finally {
-        // Restore the original theme after PDF generation
         document.body.setAttribute('data-theme', originalTheme);
-
-        // Restore the delete button to the DOM after PDF generation
         if (deleteButton && buttonParent) {
             buttonParent.appendChild(deleteButton);
             deleteButton.style.display = buttonDisplayStyle;
-            console.log('Delete button restored');
+        }
+        if (clone.parentNode) {
+            document.body.removeChild(clone);
         }
     }
 }
@@ -324,7 +493,6 @@ async function showPreview() {
     const invoice = document.getElementById('invoice');
     previewContent.innerHTML = invoice.outerHTML;
     previewModal.style.display = 'block';
-    console.log('Preview modal displayed');
 }
 
 function closePreview() {
@@ -332,7 +500,6 @@ function closePreview() {
     previewContent.innerHTML = '';
     pdfBlob = null;
     pdfBase64 = null;
-    console.log('Preview modal closed');
 }
 
 async function downloadPDF() {
@@ -345,17 +512,16 @@ async function downloadPDF() {
             a.download = 'invoice.pdf';
             a.click();
             URL.revokeObjectURL(url);
-            console.log('PDF downloaded');
         }
     } catch (err) {
         console.error('Error downloading PDF:', err);
-        alert('Failed to download PDF. Please try again.');
+        alert('Failed to download PDF. Please check the console for details and try again.');
+        throw err;
     }
 }
 
 async function sendEmail() {
     try {
-        // Generate and download the PDF first
         if (!pdfBlob) await generatePDF();
         if (pdfBlob) {
             const url = URL.createObjectURL(pdfBlob);
@@ -364,9 +530,7 @@ async function sendEmail() {
             a.download = 'invoice.pdf';
             a.click();
             URL.revokeObjectURL(url);
-            console.log('PDF downloaded for email');
 
-            // Open a mailto link with instructions for the manager to attach the PDF
             const recipient = document.getElementById('customer-email').value || 'customer@example.com';
             const subject = encodeURIComponent('Your Invoice from D\'More Tech');
             const body = encodeURIComponent(`Dear Customer,\n\nPlease find your invoice attached.\n\nBest regards,\nD'More Tech Team\n(dmoretech44@gmail.com)`);
@@ -374,7 +538,6 @@ async function sendEmail() {
             const tempLink = document.createElement('a');
             tempLink.href = emailLink;
             tempLink.click();
-            console.log('Email opened with updated instructions:', emailLink);
         } else {
             throw new Error('PDF blob not available');
         }
@@ -397,21 +560,13 @@ document.getElementById('email-link-modal').addEventListener('click', async (e) 
 document.getElementById('whatsapp-link').addEventListener('click', async (e) => {
     e.preventDefault();
     try {
-        // Generate the PDF if not already generated
         if (!pdfBlob) await generatePDF();
         if (pdfBlob) {
-            // Create a temporary URL for the PDF blob
             const pdfUrl = URL.createObjectURL(pdfBlob);
-            console.log('Temporary PDF URL generated:', pdfUrl);
-
-            // Prepare the WhatsApp message with the PDF link
             const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
             const message = encodeURIComponent(`Here is your invoice from D'More Tech. Download the PDF here: ${pdfUrl}\n\nNote: This link is temporary and will expire when the browser tab is closed.\n\nSent from: dmoretech44@gmail.com`);
             const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
-
-            // Open the WhatsApp link
             window.open(whatsappLink, '_blank');
-            console.log('WhatsApp link opened with PDF URL:', whatsappLink);
         } else {
             throw new Error('PDF blob not available');
         }

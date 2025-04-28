@@ -41,13 +41,16 @@ body {
 
 .container {
     width: 100%;
-    /* max-width: 595px; A4 width in pixels at 72dpi for desktop */
     margin: 0 auto;
     background: var(--container-bg);
     padding: 15px;
     border: 1px solid var(--container-border);
     position: relative;
     box-sizing: border-box;
+}
+
+.watermark {
+    display: none; /* Hidden in web view */
 }
 
 .header {
@@ -109,7 +112,7 @@ body {
 }
 
 .header-details p {
-    font-size: 10px;
+    font-size: 14px; /* Increased font size for desktop */
     margin: 2px 0;
 }
 
@@ -266,10 +269,34 @@ td input {
     font-size: 10px;
 }
 
-.signature img {
-    width: 80px;
-    height: 40px;
-    margin-top: 5px;
+.signature-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+.signature-options input[type="radio"] {
+    margin-right: 5px;
+}
+
+.signature-options label {
+    font-size: 10px;
+    margin-right: 10px;
+}
+
+.signature-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+}
+
+.signature-container img {
+    width: 100px; /* Increased size for better visibility */
+    height: 50px;
+    object-fit: contain; /* Prevent squeezing */
+    margin: 0 auto;
 }
 
 .signature input {
@@ -298,11 +325,11 @@ td input {
     background: #cc0000;
 }
 
-.customer-signature-section {
+.customer-signature-section, .manager-signature-section {
     position: relative;
 }
 
-#customer-signature-container {
+#customer-signature-container, #manager-signature-container {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
@@ -324,13 +351,31 @@ td input {
     display: inline-block;
 }
 
+.contact-header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-header h3 {
+    margin: 0;
+}
+
 .theme-toggle-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: #666;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    border-radius: 50%;
-    /* flex-direction: column; */
-    background: #666;
+    justify-content: center;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
 }
 
 .theme-toggle-btn:hover {
@@ -466,16 +511,10 @@ td input {
 @media (max-width: 600px) {
     .container {
         padding: 20px;
+        max-width: 100%;
     }
 
-    .right-images {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        width: fit-content;
-    }
-    
-    .left-images {
+    .right-images, .left-images {
         display: flex;
         flex-direction: column;
         gap: 5px;
@@ -491,7 +530,7 @@ td input {
     }
 
     .header-details p {
-        font-size: 6px;
+        font-size: 8px; /* Increased font size for mobile */
     }
 
     .header img.logo {
@@ -504,14 +543,6 @@ td input {
 
     .header-img.right-img {
         width: 40px;
-    }
-
-
-  
-    .left-images, .right-images {
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
     }
 
     .recipient {
@@ -533,8 +564,9 @@ td input {
     }
 
     .date {
+        border: 1px solid #000;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: space-around;
         width: 100%;
     }
 
@@ -618,7 +650,16 @@ td input {
         font-size: 8px;
     }
 
-    .signature img {
+    .signature-options {
+        gap: 5px;
+        flex-wrap: wrap; /* Ensure radio buttons wrap if needed */
+    }
+
+    .signature-options label {
+        font-size: 8px;
+    }
+
+    .signature-container img {
         width: 60px;
         height: 30px;
     }
@@ -654,6 +695,22 @@ td input {
     .contact-form input {
         width: 200px;
     }
+
+    .contact-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .theme-toggle-btn {
+        width: 24px; /* Slightly smaller for mobile */
+        height: 24px;
+        font-size: 14px; /* Adjust emoji size */
+    }
+
+    .contact-header h3 {
+        font-size: 14px; /* Smaller header for mobile */
+    }
 }
 
 /* Ensure PDF rendering always uses light theme */
@@ -664,13 +721,26 @@ td input {
     }
 
     .container {
-        /* width: 595px; */
-        /* height: auto; */
+        width: 595px;
+        height: auto;
         margin: 0;
         padding: 15px;
         background: #fff;
         border: 1px solid #ddd;
         box-sizing: border-box;
+    }
+
+    .watermark {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 24px;
+        color: rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+        z-index: 0;
+        pointer-events: none;
     }
 
     .recipient input, .date input, td input, .signature input, .note input, .contact-form input {
@@ -700,8 +770,7 @@ td input {
     }
 
     .contact-form {
-        background: #f9f9f9;
-        border: 1px solid #ddd;
+        display: none; /* Hide contact form in PDF */
     }
 
     .modal-content {
@@ -718,10 +787,19 @@ td input {
         display: none !important;
     }
 
+    .signature-options {
+        display: none !important; /* Reinforced hiding of radio buttons in PDF */
+    }
+
+    .signature-options input[type="radio"],
+    .signature-options label {
+        display: none !important; /* Ensure labels and inputs are hidden */
+    }
+
     @media (max-width: 600px) {
         .container {
-            /* width: 595px; */
-            /* height: auto; */
+            width: 595px;
+            height: auto;
             padding: 10px;
         }
 
@@ -734,7 +812,7 @@ td input {
         }
 
         .header-details p {
-            font-size: 6px;
+            font-size: 8px; /* Match mobile view */
         }
 
         .header img.logo {
@@ -761,7 +839,7 @@ td input {
             font-size: 10px;
         }
 
-        table, th, td, td input {
+        .table, th, td, td input {
             font-size: 8px;
         }
 
@@ -789,12 +867,9 @@ td input {
             font-size: 8px;
         }
 
-        .signature img {
-            display: flex;
-            justify-content: space-around;
+        .signature-container img {
             width: 60px;
             height: 30px;
         }
     }
-    
 }

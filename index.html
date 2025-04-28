@@ -9,7 +9,12 @@
 </head>
 <body>
     <div class="contact-form">
-        <h3>Customer Contact Information</h3>
+        <div class="contact-header">
+            <h3>Customer Contact Information</h3>
+            <button class="theme-toggle-btn" onclick="toggleTheme()">
+                <span class="theme-icon">☀️</span>
+            </button>
+        </div>
         <label for="customer-email">Customer Gmail:</label>
         <input type="email" id="customer-email" placeholder="Enter customer's Gmail">
         <label for="customer-whatsapp">Customer WhatsApp (Phone Number):</label>
@@ -17,6 +22,7 @@
     </div>
 
     <div class="container" id="invoice">
+        <div class="watermark">D'MORE TECH ENGINEERING & TRADING COMPANY</div>
         <div class="header">
             <div class="header-top">
                 <img class="logo" src="/images/logo.png" alt="Logo">
@@ -70,10 +76,18 @@
                     <th>Description of Goods</th>
                     <th>Qty</th>
                     <th>Rate</th>
-                    <th>Amount<br><span>&#8358;</span> K</th>
+                    <th>Amount<br>₦ K</th>
                 </tr>
             </thead>
             <tbody id="items">
+                <!-- Initial 2 rows -->
+                <tr>
+                    <td><input type="text" class="sno"></td>
+                    <td><input type="text" class="description"></td>
+                    <td><input type="text" class="quantity"></td>
+                    <td><input type="text" class="rate"></td>
+                    <td><input type="text" class="amount" readonly></td>
+                </tr>
                 <tr>
                     <td><input type="text" class="sno"></td>
                     <td><input type="text" class="description"></td>
@@ -84,7 +98,7 @@
             </tbody>
         </table>
 
-        <div class="total">TOTAL <span>&#8358;</span> <span id="total">0</span></div>
+        <div class="total">TOTAL ₦ <span id="total">0</span></div>
 
         <div class="note">
             <strong style="font-size: 10px;">Please Note:</strong><span style="font-weight:600;font-size: 8px;"> Goods sold in good condition are not returnable.<br>
@@ -95,25 +109,36 @@
         <div class="signature">
             <div class="customer-signature-section">
                 <label>Customer's Signature: </label><br>
+                <div class="signature-options">
+                    <input type="radio" name="customer-signature-type" value="image" checked onclick="toggleCustomerSignatureType('image')"> Signature
+                    <input type="radio" name="customer-signature-type" value="text" onclick="toggleCustomerSignatureType('text')"> Name
+                </div>
                 <input type="text" id="customer-signature-naira" placeholder="Naira" readonly>
                 <input type="text" id="customer-signature-kobo" placeholder="Kobo" readonly>
-                <div id="customer-signature-container"></div>
+                <input type="text" id="customer-signature-name" placeholder="Customer Name" style="display: none;">
+                <div id="customer-signature-container" class="signature-container"></div>
                 <button id="delete-customer-signature" style="display: none;" onclick="deleteCustomerSignature()">Delete Signature</button>
             </div>
-            <div>
+            <div class="manager-signature-section">
                 <label>Manager's Signature: </label><br>
-                <img id="manager-signature" src="/images/manager_signature.png" alt="Manager Signature">
+                <div class="signature-options">
+                    <input type="radio" name="manager-signature-type" value="image" checked onclick="toggleManagerSignatureType('image')"> Signature
+                    <input type="radio" name="manager-signature-type" value="text" onclick="toggleManagerSignatureType('text')"> Name
+                </div>
+                <input type="text" id="manager-signature-name" placeholder="Manager Name" style="display: none;">
+                <div id="manager-signature-container" class="signature-container">
+                    <img id="manager-signature" src="/images/manager_signature.png" alt="Manager Signature">
+                </div>
             </div>
         </div>
     </div>
 
     <div class="upload-section">
-        <label>CustomerSignature: </label>
+        <label>Customer Signature: </label>
         <input type="file" id="signature-upload" placeholder="upload customer signature" accept="image/*">
     </div>
 
     <div class="buttons">
-        <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Light/Dark Mode</button>
         <button class="preview-btn" onclick="showPreview()">Preview Invoice</button>
         <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
         <a class="email-btn" id="email-link" href="#">Send via Email</a>
