@@ -172,6 +172,7 @@ body {
     display: flex;
     gap: 5px;
     align-items: center;
+    border: 1px solid var(--text-color);
 }
 
 .date label {
