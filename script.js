@@ -6,6 +6,14 @@ const previewContent = document.getElementById('preview-content');
 let pdfBlob = null;
 let pdfBase64 = null;
 
+// Check if user is logged in
+function checkLogin() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+        window.location.href = '/index.html';
+    }
+}
+
 // Load theme from localStorage or default to light
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -28,8 +36,15 @@ function toggleTheme() {
     updateThemeIcon(newTheme);
 }
 
+// Logout function
+function logout() {
+    localStorage.removeItem('isLoggedIn');
+    window.location.href = '/index.html';
+}
+
 // Automatically set the current date and load theme
 window.onload = function() {
+    checkLogin(); // Check login status on page load
     const today = new Date();
     document.getElementById('day').value = today.getDate();
     document.getElementById('month').value = today.getMonth() + 1; // Months are 0-based
