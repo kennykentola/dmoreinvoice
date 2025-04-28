@@ -7,7 +7,13 @@ function handleLogin() {
     const validUsername = 'ademola';
     const validPassword = 'ademola23';
 
-    if (username === validUsername && password === validPassword) {
+    // Convert both entered username and password to lowercase for comparison
+    const enteredUsernameLower = username.toLowerCase();
+    const validUsernameLower = validUsername.toLowerCase();
+    const enteredPasswordLower = password.toLowerCase();
+    const validPasswordLower = validPassword.toLowerCase();
+
+    if (enteredUsernameLower === validUsernameLower && enteredPasswordLower === validPasswordLower) {
         // Store login state in localStorage
         localStorage.setItem('isLoggedIn', 'true');
         // Redirect to the invoice generator page
