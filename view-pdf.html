@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Invoice PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #pdf-viewer {
+            width: 100%;
+            max-width: 595px; /* A4 width in pixels */
+            height: 842px; /* A4 height in pixels */
+            border: 1px solid #ddd;
+        }
+        .error-message {
+            color: #ff0000;
+            font-size: 16px;
+            text-align: center;
+        }
+        .download-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ff0000;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .download-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Invoice PDF</h1>
+    <div id="pdf-viewer"></div>
+    <a id="download-link" class="download-btn" style="display: none;">Download PDF</a>
+    <p id="error-message" class="error-message"></p>
+
+    <script>
+        // Function to get the query parameter 'id' from the URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to retrieve the PDF from IndexedDB
+        async function retrievePDF(pdfId) {
+            return new Promise((resolve, reject) => {
+                const dbRequest = indexedDB.open('pdfDatabase', 1);
+
+                dbRequest.onupgradeneeded = function(event) {
+                    const db = event.target.result;
+                    db.createObjectStore('pdfs', { keyPath: 'id' });
+                };
+
+                dbRequest.onsuccess = function(event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction(['pdfs'], 'readonly');
+                    const store = transaction.objectStore('pdfs');
+                    const request = store.get(pdfId);
+
+                    request.onsuccess = function(event) {
+                        if (event.target.result) {
+                            resolve(event.target.result.blob);
+                        } else {
+                            reject('PDF not found in IndexedDB');
+                        }
+                    };
+
+                    request.onerror = function() {
+                        reject('Error retrieving PDF from IndexedDB');
+                    };
+                };
+
+                dbRequest.onerror = function() {
+                    reject('Error opening IndexedDB');
+                };
+            });
+        }
+
+        // Function to display the PDF in an object tag
+        function displayPDF(blob) {
+            const url = URL.createObjectURL(blob);
+            const pdfViewer = document.getElementById('pdf-viewer');
+            const object = document.createElement('object');
+            object.data = url;
+            object.type = 'application/pdf';
+            object.width = '100%';
+            object.height = '100%';
+            pdfViewer.appendChild(object);
+
+            // Provide a download link as a fallback
+            const downloadLink = document.getElementById('download-link');
+            downloadLink.href = url;
+            downloadLink.download = 'invoice.pdf';
+            downloadLink.style.display = 'inline-block';
+        }
+
+        // Main function to load the PDF
+        async function loadPDF() {
+            const pdfId = getQueryParam('id');
+            const errorMessage = document.getElementById('error-message');
+
+            if (!pdfId) {
+                errorMessage.textContent = 'No PDF ID provided in the URL.';
+                return;
+            }
+
+            try {
+                const pdfBlob = await retrievePDF(pdfId);
+                displayPDF(pdfBlob);
+            } catch (err) {
+                console.error('Error loading PDF:', err);
+                errorMessage.textContent = 'Failed to load PDF: ' + err;
+            }
+        }
+
+        // Load the PDF when the page loads
+        window.onload = loadPDF;
+    </script>
+</body>
+</html>
