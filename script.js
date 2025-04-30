@@ -656,7 +656,7 @@ document.getElementById('whatsapp-link').addEventListener('click', async (e) => 
         const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
         
         // Create a simplified WhatsApp message for the receiver
-        const message = encodeURIComponent(`Here is your invoice from D'More Tech this pdf mighty not download if the sender use iphone and you use android phone or desktop please bear with us our developer still working on this : ${viewPdfUrl}\n\nSent from : dmoretech44@gmail.com: \n\nThank you .`);
+        const message = encodeURIComponent(`Here is your invoice from D'More Tech this pdf mighty not download if the sender use iphone and you use android phone or desktop please bear with us our developer still working on this:\n\nplease tell the sender to send it manually to you  : ${viewPdfUrl}\n\nSent from : dmoretech44@gmail.com: \n\nThank you .`);
         const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
         
         // Open WhatsApp with the share link
