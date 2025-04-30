@@ -9,7 +9,7 @@
     --input-border: #ccc;
     --table-header-bg: #f0f0f0;
     --table-body-bg: #90ee90;
-    --note-color: #555;
+    --note-color: #000; /* Changed to pure black for better visibility */
     --contact-form-bg: #f9f9f9;
     --modal-bg: #fefefe;
     --date-input-bg: #f0f0f0;
@@ -25,7 +25,7 @@
     --input-border: #555;
     --table-header-bg: #444;
     --table-body-bg: #3a5f3a;
-    --note-color: #aaa;
+    --note-color: #ccc; /* Lighter for dark theme visibility */
     --contact-form-bg: #2c2c2c;
     --modal-bg: #333;
     --date-input-bg: #444;
@@ -88,17 +88,19 @@ body {
 }
 
 .header h1 {
-    font-size: 20px;
+    font-size: 24px; /* Increased for better visibility */
     font-weight: bold;
     margin: 0;
     text-align: center;
+    color: var(--text-color);
 }
 
 .header .motto {
-    font-size: 12px;
+    font-size: 14px; /* Increased for better visibility */
     font-weight: bold;
     margin: 2px 0;
     text-align: center;
+    color: var(--text-color);
 }
 
 .header-images {
@@ -124,8 +126,10 @@ body {
 }
 
 .header-details p {
-    font-size: 14px; /* Increased font size for desktop */
+    font-size: 16px; /* Increased for better visibility */
     margin: 2px 0;
+    color: var(--text-color);
+    font-weight: 600; /* Added for emphasis */
 }
 
 .right-images {
@@ -243,25 +247,25 @@ td input {
 }
 
 .note {
-    font-size: 8px;
+    font-size: 10px; /* Increased for better visibility */
     color: var(--note-color);
     margin-bottom: 10px;
     z-index: 2;
 }
 
 .note strong {
-    font-size: 10px;
+    font-size: 12px; /* Increased for better visibility */
     color: var(--note-color);
 }
 
 .note span {
     font-weight: 600;
-    font-size: 8px;
+    font-size: 10px; /* Increased for better visibility */
     color: var(--note-color);
 }
 
 .note h3 {
-    font-size: 12px;
+    font-size: 14px; /* Increased for better visibility */
     margin: 5px 0;
     color: var(--text-color);
 }
@@ -269,10 +273,11 @@ td input {
 .note input {
     width: 100%;
     padding: 2px;
-    font-size: 8px;
+    font-size: 10px; /* Increased for better visibility */
     border: none;
     background: transparent;
     color: var(--note-color);
+    font-weight: 600; /* Added for emphasis */
 }
 
 .signature {
@@ -559,15 +564,15 @@ td input {
     }
 
     .header h1 {
-        font-size: 12px;
+        font-size: 14px; /* Increased for better visibility */
     }
 
     .header .motto {
-        font-size: 8px;
+        font-size: 10px; /* Increased for better visibility */
     }
 
     .header-details p {
-        font-size: 8px; /* Increased font size for mobile */
+        font-size: 10px; /* Increased for better visibility */
         font-weight: 600;
     }
 
@@ -577,12 +582,10 @@ td input {
 
     .header-img.left-img {
         width: 50px;
-       
     }
 
     .header-img.right-img {
         width: 40px;
-       
     }
 
     .recipient {
@@ -661,23 +664,23 @@ td input {
     }
 
     .note {
-        font-size: 6px;
+        font-size: 8px; /* Increased for better visibility */
     }
 
     .note strong {
-        font-size: 10px;
+        font-size: 10px; /* Increased for better visibility */
     }
 
     .note span {
-        font-size: 8px;
+        font-size: 8px; /* Increased for better visibility */
     }
 
     .note h3 {
-        font-size: 10px;
+        font-size: 12px; /* Increased for better visibility */
     }
 
     .note input {
-        font-size: 6px;
+        font-size: 8px; /* Increased for better visibility */
     }
 
     .signature {
@@ -790,6 +793,22 @@ td input {
         pointer-events: none;
     }
 
+    .header h1 {
+        font-size: 24px; /* Match desktop for PDF */
+        color: #000;
+    }
+
+    .header .motto {
+        font-size: 14px; /* Match desktop for PDF */
+        color: #000;
+    }
+
+    .header-details p {
+        font-size: 16px; /* Match desktop for PDF */
+        color: #000;
+        font-weight: 600;
+    }
+
     .recipient input, .date input, td input, .signature input, .note input, .contact-form input {
         background: #fff;
         border: 1px solid #ccc;
@@ -809,11 +828,25 @@ td input {
     }
 
     .note, .note strong, .note span, .note input {
-        color: #555;
+        color: #000; /* Match --note-color in light theme */
     }
 
     .note h3 {
+        font-size: 14px; /* Match desktop for PDF */
         color: #000;
+    }
+
+    .note strong {
+        font-size: 12px; /* Match desktop for PDF */
+    }
+
+    .note span {
+        font-size: 10px; /* Match desktop for PDF */
+    }
+
+    .note input {
+        font-size: 10px; /* Match desktop for PDF */
+        font-weight: 600;
     }
 
     .contact-form {
@@ -851,15 +884,15 @@ td input {
         }
 
         .header h1 {
-            font-size: 12px;
+            font-size: 14px; /* Match mobile view */
         }
 
         .header .motto {
-            font-size: 8px;
+            font-size: 10px; /* Match mobile view */
         }
 
         .header-details p {
-            font-size: 8px; /* Match mobile view */
+            font-size: 10px; /* Match mobile view */
         }
 
         .header img.logo {
@@ -894,20 +927,24 @@ td input {
             font-size: 10px;
         }
 
-        .note, .note input {
-            font-size: 6px;
+        .note {
+            font-size: 8px; /* Match mobile view */
         }
 
         .note strong {
-            font-size: 10px;
+            font-size: 10px; /* Match mobile view */
         }
 
         .note span {
-            font-size: 8px;
+            font-size: 8px; /* Match mobile view */
         }
 
         .note h3 {
-            font-size: 10px;
+            font-size: 12px; /* Match mobile view */
+        }
+
+        .note input {
+            font-size: 8px; /* Match mobile view */
         }
 
         .signature label {

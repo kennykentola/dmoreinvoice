@@ -639,7 +639,7 @@ document.getElementById('whatsapp-link').addEventListener('click', async (e) => 
             pdfId = await storePDFInIndexedDB(pdfBlob);
         }
 
-        // Download the PDF as a fallback
+        // Download the PDF for the sender
         if (pdfBlob) {
             const url = URL.createObjectURL(pdfBlob);
             const a = document.createElement('a');
@@ -649,18 +649,23 @@ document.getElementById('whatsapp-link').addEventListener('click', async (e) => 
             URL.revokeObjectURL(url);
         }
 
-        // Create a short URL to view the PDF
+        // Create a URL to view the PDF
         const viewPdfUrl = `https://dmoretech1.vercel.app/view-pdf.html?id=${pdfId}`;
         
         // Get the WhatsApp number
         const whatsappNumber = document.getElementById('customer-whatsapp').value || '';
         
-        // Create the WhatsApp share link with the short URL
-        const message = encodeURIComponent(`Here is your invoice from D'More Tech: ${viewPdfUrl}\n\nNote: If the link doesn't work (e.g., on a different device), the PDF has been downloaded to your device as 'invoice.pdf'. Please attach it manually.\n\nSent from: dmoretech44@gmail.com`);
+        // Create a simplified WhatsApp message for the receiver
+        const message = encodeURIComponent(`Here is your invoice from D'More Tech: ${viewPdfUrl}\n\nSent from: dmoretech44@gmail.com`);
         const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
         
         // Open WhatsApp with the share link
         window.open(whatsappLink, '_blank');
+
+        // Show the sender a message about the fallback
+        setTimeout(() => {
+            alert(`The PDF has been downloaded to your device as 'invoice.pdf'. If the receiver cannot access the link (e.g., on a different device), please manually attach the downloaded PDF in WhatsApp.`);
+        }, 500);
     } catch (err) {
         console.error('Error sending WhatsApp message:', err);
         if (pdfBlob) {
