@@ -95,10 +95,10 @@ document.querySelectorAll('#items .quantity, #items .rate').forEach(input => {
 
 // Function to convert number to words with proper "and" placement
 function numberToWords(num) {
-    const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const units = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    const thousands = ['', 'Thousand', 'Million', 'Billion'];
+    const thousands = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion'];
 
     if (num === 0) return 'Zero';
 
@@ -113,7 +113,8 @@ function numberToWords(num) {
         }
 
         if (n >= 20) {
-            words += tens[Math.floor(n / 10)];
+            const tenIndex = Math.floor(n / 10);
+            words += tens[tenIndex];
             n %= 10;
             if (n > 0) words += ' ' + units[n];
         } else if (n >= 10) {
@@ -130,11 +131,18 @@ function numberToWords(num) {
 
     while (num > 0) {
         const chunk = num % 1000;
-        if (chunk > 0) {
+        if (chunk > 0) { // Only process non-zero chunks
             let chunkWords = convertChunk(chunk);
+            // Check if thousands label exists for the chunkCount
             if (chunkCount > 0) {
-                chunkWords += ' ' + thousands[chunkCount];
+                if (thousands[chunkCount]) {
+                    chunkWords += ' ' + thousands[chunkCount];
+                } else {
+                    // Fallback for numbers larger than the defined thousands labels
+                    chunkWords += ' (Number too large to convert)';
+                }
             }
+            // Add "and" only if there's a previous word and the current chunk is less than 100
             if (words && chunk < 100) {
                 words = chunkWords + ' and ' + words;
             } else {
@@ -145,7 +153,7 @@ function numberToWords(num) {
         chunkCount++;
     }
 
-    return words.trim();
+    return words.trim() || 'Zero'; // Ensure we return 'Zero' if the result is empty
 }
 
 function calculateTotal() {
@@ -154,12 +162,19 @@ function calculateTotal() {
         const amount = parseFloat(input.value) || 0;
         total += amount;
     });
-    totalSpan.textContent = total;
+    totalSpan.textContent = total.toFixed(2); // Ensure total has 2 decimal places for consistency
 
-    const totalStr = total.toString();
+    // Split total into Naira and Kobo
+    const totalStr = total.toFixed(2).toString();
     const [naira, kobo = '00'] = totalStr.split('.');
-    const nairaWords = numberToWords(parseInt(naira));
-    const koboWords = kobo === '00' ? 'Zero' : numberToWords(parseInt(kobo));
+    const nairaNum = parseInt(naira) || 0;
+    const koboNum = parseInt(kobo) || 0;
+
+    // Convert Naira and Kobo to words
+    const nairaWords = numberToWords(nairaNum);
+    const koboWords = numberToWords(koboNum);
+
+    // Update the amount in words field
     amountWordsInput.value = `${nairaWords} Naira ${koboWords} Kobo`;
     document.getElementById('customer-signature-naira').value = nairaWords;
     document.getElementById('customer-signature-kobo').value = koboWords;

@@ -23,7 +23,7 @@
     --container-border: #444;
     --input-bg: #333;
     --input-border: #555;
-    --table-header-bg: #444;
+ --table-header-bg: #444;
     --table-body-bg: #3a5f3a;
     --note-color: #ccc; /* Lighter for dark theme visibility */
     --contact-form-bg: #2c2c2c;
@@ -237,7 +237,13 @@ td input {
     color: var(--text-color);
     z-index: 2; /* Ensure inputs are above watermark */
 }
-
+td input.amount{
+    color: var(--text-color);
+    background-color: var(--table-header-bg);
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+}
 .total {
     text-align: right;
     font-weight: bold;
